@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>La Liga Hub - Главная</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff4b44 0%, #ffffff 50%, #d9403a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,215,0,0.1) 0%, transparent 80%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 60px;
+            padding: 40px 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,215,0,0.5);
+            text-align: center;
+        }
+
+        /* Верхняя панель с тремя логотипами */
+        .top-logos {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* Левый логотип (Ла Лига) */
+        .logo-left {
+            flex-shrink: 0;
+        }
+
+        /* Центральный логотип (ТГ канал) */
+        .logo-center {
+            flex-shrink: 0;
+        }
+
+        /* Правый логотип (Федерация) */
+        .logo-right {
+            flex-shrink: 0;
+        }
+
+        .logo-img {
+            max-height: 70px;
+            width: auto;
+            display: block;
+        }
+
+        .logo-placeholder {
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px;
+            padding: 8px 16px;
+            border: 2px solid #FFD700;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .logo-placeholder:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-error {
+            display: none;
+            font-size: 10px;
+            color: #ff4b44;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-weight: normal;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .sub {
+            color: #ff4a42;
+            font-size: 1rem;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Сетка кнопок */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #FFD700;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.3);
+            border-color: #FFA500;
+        }
+
+        .game-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1B3B6F;
+            margin-bottom: 10px;
+        }
+
+        .game-description {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Статус (скоро) */
+        .coming-soon {
+            opacity: 0.7;
+            position: relative;
+        }
+
+        .coming-soon::after {
+            content: "СКОРО";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #FFD700;
+            color: #1B3B6F;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .coming-soon:hover {
+            transform: translateY(0);
+            cursor: not-allowed;
+        }
+
+        /* Футер */
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .telegram-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+            color: white;
+            text-decoration: none;
+            padding: 10px 25px;
+            border-radius: 40px;
+            font-weight: bold;
+            transition: all 0.2s;
+            border: 1px solid #FFD700;
+        }
+
+        .telegram-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        @media (max-width: 650px) {
+            .top-logos {
+                flex-direction: row;
+                justify-content: center;
+            }
+            .logo-img {
+                max-height: 50px;
+            }
+            .logo-placeholder {
+                padding: 5px 10px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .game-card {
+                padding: 20px 15px;
+            }
+            .game-icon {
+                font-size: 2.5rem;
+            }
+            .game-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Верхняя панель с тремя логотипами -->
+    <div class="top-logos">
+        <!-- СЛЕВА: ЛОГОТИП ЛА ЛИГИ -->
+        <div class="logo-left">
+            <div class="logo-placeholder">
+                <img src="laliga_mini.png" alt="La Liga Logo" class="logo-img" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-error">⚠️ Ла Лига</div>
+            </div>
+        </div>
+
+        <!-- ЦЕНТР: ЛОГОТИП TELEGRAM КАНАЛА -->
+        <div class="logo-center">
+            <div class="logo-placeholder">
+                <img src="tg_channel_logo.png" alt="Telegram Channel Logo" class="logo-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-error">⚠️ ТГ канал</div>
+            </div>
+        </div>
+
+        <!-- СПРАВА: ЛОГОТИП ФЕДЕРАЦИИ (RFEF) -->
+        <div class="logo-right">
+            <div class="logo-placeholder">
+                <img src="rfef_logo.png" alt="RFEF Logo" class="logo-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="logo-error">⚠️ RFEF</div>
+            </div>
+        </div>
+    </div>
+
+    <h1>⚡ IsAEspana ⚡</h1>
+    <div class="sub">Выбери режим и проверь свои знания о Ла Лиге</div>
+
+    <div class="games-grid">
+        <!-- Прогноз (готов) -->
+        <div class="game-card" onclick="window.location.href='ллл.html'">
+            <div class="game-icon">📊</div>
+            <div class="game-title">Прогноз</div>
+            <div class="game-description">
+                Составь свою таблицу<br>
+                Перетаскивай команды и сохраняй результат в PNG
+            </div>
+        </div>
+
+        <!-- Угадайка (в разработке) -->
+        <div class="game-card coming-soon" onclick="showComingSoon()">
+            <div class="game-icon">❓</div>
+            <div class="game-title">Угадайка</div>
+            <div class="game-description">
+                Угадай команду по описанию<br>
+                Проверь свои знания
+            </div>
+        </div>
+
+        <!-- Игра (в разработке) -->
+        <div class="game-card coming-soon" onclick="showComingSoon()">
+            <div class="game-icon">🎮</div>
+            <div class="game-title">Игра</div>
+            <div class="game-description">
+                Интерактивная викторина<br>
+                Соревнуйся с друзьями
+            </div>
+        </div>
+
+        <!-- Статистика (в разработке) -->
+        <div class="game-card coming-soon" onclick="showComingSoon()">
+            <div class="game-icon">📈</div>
+            <div class="game-title">Статистика</div>
+            <div class="game-description">
+                Анализ прогнозов<br>
+                Твоя статистика
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="https://t.me/Is4Espana" target="_blank" class="telegram-link">
+            📱 Telegram-канал
+        </a>
+        <div class="copyright">
+            © 2026 La Liga Hub | Все права защищены
+        </div>
+    </div>
+</div>
+
+<script>
+    function showComingSoon() {
+        alert('🔜 Этот режим скоро появится!\n\nСледи за обновлениями в Telegram-канале');
+    }
+    
+    console.log('La Liga Hub загружен. Нажми "Прогноз" для перехода');
+</script>
+
+</body>
+</html>
