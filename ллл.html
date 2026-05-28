@@ -626,7 +626,7 @@
         }, 2000);
     }
 
-    async function saveTableAsPNG() {
+        async function saveTableAsPNG() {
         const element = document.getElementById('tableToCapture');
         if (!element) return;
         
@@ -636,27 +636,44 @@
         statusDiv.style.opacity = '0.7';
         
         try {
+            // Создаём canvas
             const canvas = await html2canvas(element, {
-                scale: 2.5,
+                scale: 2,
                 backgroundColor: '#fef9e6',
                 logging: false,
                 useCORS: true,
                 allowTaint: false
             });
             
-            const link = document.createElement('a');
-            const date = new Date();
-            const fileName = `laliga_predict_${date.getFullYear()}_${date.getMonth()+1}_${date.getDate()}.png`;
-            link.download = fileName;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            // Для телефонов: открываем картинку в новой вкладке
+            const dataURL = canvas.toDataURL('image/png');
             
-            statusDiv.innerHTML = '✅ PNG сохранён! ✅';
+            // Проверяем, мобильное устройство или нет
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // На телефоне - открываем в новой вкладке, пользователь сохранит сам
+                const newTab = window.open();
+                newTab.document.write(`<img src="${dataURL}" style="width:100%;" />`);
+                newTab.document.title = 'Ваш прогноз';
+                statusDiv.innerHTML = '✅ Изображение открыто! Нажми и удерживай, чтобы сохранить ✅';
+            } else {
+                // На компьютере - скачиваем как обычно
+                const link = document.createElement('a');
+                const date = new Date();
+                const fileName = `laliga_predict_${date.getFullYear()}_${date.getMonth()+1}_${date.getDate()}.png`;
+                link.download = fileName;
+                link.href = dataURL;
+                link.click();
+                statusDiv.innerHTML = '✅ PNG сохранён! ✅';
+            }
+            
             statusDiv.style.opacity = '1';
             setTimeout(() => {
-                if (statusDiv.innerHTML.includes("PNG сохранён"))
+                if (statusDiv.innerHTML.includes("PNG") || statusDiv.innerHTML.includes("изображение"))
                     statusDiv.innerHTML = originalText;
-            }, 3000);
+            }, 4000);
+            
         } catch (error) {
             console.error('Ошибка:', error);
             statusDiv.innerHTML = '❌ Ошибка при создании PNG ❌';
