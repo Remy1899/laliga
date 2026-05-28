@@ -626,7 +626,7 @@
         }, 2000);
     }
 
-        async function saveTableAsPNG() {
+    async function saveTableAsPNG() {
         const element = document.getElementById('tableToCapture');
         if (!element) return;
         
@@ -636,7 +636,6 @@
         statusDiv.style.opacity = '0.7';
         
         try {
-            // Создаём canvas
             const canvas = await html2canvas(element, {
                 scale: 2,
                 backgroundColor: '#fef9e6',
@@ -645,20 +644,81 @@
                 allowTaint: false
             });
             
-            // Для телефонов: открываем картинку в новой вкладке
             const dataURL = canvas.toDataURL('image/png');
             
-            // Проверяем, мобильное устройство или нет
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            // Способ 1: Поделиться (работает на телефонах)
+            if (navigator.share) {
+                // Преобразуем dataURL в blob
+                const blob = await (await fetch(dataURL)).blob();
+                const file = new File([blob], 'laliga_predict.png', { type: 'image/png' });
+                
+                try {
+                    await navigator.share({
+                        title: 'Мой прогноз Ла Лиги',
+                        text: 'Смотри, какой прогноз я составил!',
+                        files: [file]
+                    });
+                    statusDiv.innerHTML = '✅ Готово! Таблицей можно поделиться ✅';
+                    statusDiv.style.opacity = '1';
+                    setTimeout(() => statusDiv.innerHTML = originalText, 3000);
+                    return;
+                } catch (shareErr) {
+                    console.log('Поделиться отменено или не поддерживается');
+                }
+            }
             
-            if (isMobile) {
-                // На телефоне - открываем в новой вкладке, пользователь сохранит сам
-                const newTab = window.open();
-                newTab.document.write(`<img src="${dataURL}" style="width:100%;" />`);
-                newTab.document.title = 'Ваш прогноз';
+            // Способ 2: Для телефонов - открываем в новой вкладке с инструкцией
+            const newWindow = window.open();
+            if (newWindow) {
+                newWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Ваш прогноз Ла Лиги</title>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { 
+                                margin: 0; 
+                                padding: 20px; 
+                                background: #fef9e6;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                font-family: sans-serif;
+                            }
+                            img { 
+                                max-width: 100%; 
+                                height: auto; 
+                                border: 2px solid #FFD700;
+                                border-radius: 20px;
+                            }
+                            .instruction {
+                                background: #FFD700;
+                                padding: 15px;
+                                border-radius: 15px;
+                                margin-top: 20px;
+                                text-align: center;
+                                font-weight: bold;
+                                color: #1B2F4F;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${dataURL}" alt="Прогноз Ла Лиги" />
+                        <div class="instruction">
+                            📱 Нажми и удерживай на картинке<br>
+                            → Выбери «Сохранить изображение»
+                        </div>
+                        <p style="color: #666; font-size: 12px; margin-top: 15px;">
+                            Прогноз составлен в La Liga Predictor
+                        </p>
+                    </body>
+                    </html>
+                `);
+                newWindow.document.close();
                 statusDiv.innerHTML = '✅ Изображение открыто! Нажми и удерживай, чтобы сохранить ✅';
             } else {
-                // На компьютере - скачиваем как обычно
+                // Способ 3: Скачивание (для компьютеров)
                 const link = document.createElement('a');
                 const date = new Date();
                 const fileName = `laliga_predict_${date.getFullYear()}_${date.getMonth()+1}_${date.getDate()}.png`;
@@ -672,7 +732,7 @@
             setTimeout(() => {
                 if (statusDiv.innerHTML.includes("PNG") || statusDiv.innerHTML.includes("изображение"))
                     statusDiv.innerHTML = originalText;
-            }, 4000);
+            }, 5000);
             
         } catch (error) {
             console.error('Ошибка:', error);
