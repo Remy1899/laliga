@@ -585,7 +585,7 @@
         }, 2000);
     }
 
-    // Функция сохранения PNG с модальным окном для телефонов
+    // Функция сохранения PNG с кнопкой "Поделиться" для Telegram
     async function saveTableAsPNG() {
         const element = document.getElementById('tableToCapture');
         if (!element) return;
@@ -608,7 +608,11 @@
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             
             if (isMobile) {
-                // Создаём модальное окно с картинкой
+                // Преобразуем в Blob для отправки
+                const blob = await (await fetch(dataURL)).blob();
+                const file = new File([blob], 'laliga_predict.png', { type: 'image/png' });
+                
+                // Создаём модальное окно с картинкой и кнопкой "Поделиться"
                 const modal = document.createElement('div');
                 modal.style.cssText = `
                     position: fixed;
@@ -629,25 +633,47 @@
                 img.src = dataURL;
                 img.style.cssText = `
                     max-width: 95%;
-                    max-height: 70%;
+                    max-height: 60%;
                     border-radius: 20px;
                     border: 3px solid #FFD700;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
                 `;
                 
-                const instruction = document.createElement('div');
-                instruction.style.cssText = `
-                    background: #FFD700;
-                    color: #1B2F4F;
-                    padding: 15px 25px;
-                    border-radius: 50px;
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = `
+                    display: flex;
+                    gap: 15px;
                     margin-top: 25px;
-                    text-align: center;
-                    font-weight: bold;
-                    font-size: 16px;
-                    max-width: 90%;
+                    flex-wrap: wrap;
+                    justify-content: center;
                 `;
-                instruction.innerHTML = '📱 Нажми и удерживай на картинке<br>→ «Копировать» или «Переслать»';
+                
+                const shareBtn = document.createElement('button');
+                shareBtn.innerHTML = '📤 Поделиться';
+                shareBtn.style.cssText = `
+                    background: #0088cc;
+                    color: white;
+                    border: none;
+                    padding: 12px 25px;
+                    border-radius: 40px;
+                    font-size: 16px;
+                    cursor: pointer;
+                `;
+                shareBtn.onclick = async () => {
+                    try {
+                        if (navigator.share) {
+                            await navigator.share({
+                                title: 'Мой прогноз Ла Лиги',
+                                text: 'Смотри, какой прогноз я составил!',
+                                files: [file]
+                            });
+                        } else {
+                            alert('Нажми и удерживай на картинке, чтобы сохранить');
+                        }
+                    } catch(e) {
+                        console.log('Поделиться отменено');
+                    }
+                };
                 
                 const closeBtn = document.createElement('button');
                 closeBtn.innerHTML = '✖ Закрыть';
@@ -655,21 +681,33 @@
                     background: #ff4b44;
                     color: white;
                     border: none;
-                    padding: 10px 25px;
+                    padding: 12px 25px;
                     border-radius: 40px;
                     font-size: 16px;
-                    margin-top: 20px;
                     cursor: pointer;
                 `;
                 closeBtn.onclick = () => document.body.removeChild(modal);
                 
+                const instruction = document.createElement('div');
+                instruction.style.cssText = `
+                    color: #FFD700;
+                    text-align: center;
+                    margin-top: 20px;
+                    font-size: 12px;
+                    max-width: 80%;
+                `;
+                instruction.innerHTML = '💡 Нажми «Поделиться» → выбери чат или сохрани в файлы';
+                
+                buttonContainer.appendChild(shareBtn);
+                buttonContainer.appendChild(closeBtn);
+                
                 modal.appendChild(img);
+                modal.appendChild(buttonContainer);
                 modal.appendChild(instruction);
-                modal.appendChild(closeBtn);
                 
                 document.body.appendChild(modal);
                 
-                statusDiv.innerHTML = '✅ Картинка открыта! Нажми и удерживай для копирования ✅';
+                statusDiv.innerHTML = '✅ Картинка создана! Нажми «Поделиться» ✅';
             } else {
                 // Для компьютера: скачиваем
                 const link = document.createElement('a');
