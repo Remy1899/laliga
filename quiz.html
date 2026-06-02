@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Угадайка - Ла Лига</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff4b44 0%, #ffffff 50%, #d9403a 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,215,0,0.1) 0%, transparent 80%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border: 2px solid #FFD700;
+        }
+
+        /* Верхняя панель */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 8px;
+            padding: 5px 12px;
+            border: 2px solid #FFD700;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .logo-img {
+            max-height: 45px;
+            width: auto;
+            display: block;
+        }
+
+        .logo-error {
+            display: none;
+            font-size: 8px;
+            color: #ff4b44;
+        }
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #6c5ce7 0%, #5a4ace 100%);
+            color: white;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border: 1px solid #FFD700;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Заголовок */
+        h1 {
+            text-align: center;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-weight: normal;
+            background: linear-gradient(135deg, #000000 0%, #000000 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0 0 5px 0;
+            font-size: 2rem;
+        }
+
+        .sub {
+            text-align: center;
+            color: #ff4b44;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        /* Карточка вопроса */
+        .quiz-card {
+            background: linear-gradient(135deg, #ff4b44 0%, #ff4b44 100%);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid #FFD700;
+        }
+
+        .question-text {
+            color: #FFFFFF;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        /* Варианты ответов */
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            background: rgba(255,255,255,0.9);
+            border: 2px solid #FFD700;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            background: #FFFFFF;
+            transform: translateX(5px);
+        }
+
+        .answer-btn.correct {
+            background: #00ff00;
+            border-color: #1e6b60;
+            color: white;
+        }
+
+        .answer-btn.wrong {
+            background: #ff4b44;
+            border-color: #d9403a;
+            color: white;
+        }
+
+        .answer-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Панель статистики */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #FFD700;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .score {
+            background: #ffebe1;
+            color: #000000;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .question-counter {
+            background: #ffebe1;
+            color: #000000;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #ffebe1 0%, #ffebe1 100%);
+            border: none;
+            padding: 10px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #000000;
+            box-shadow: 0 4px 0 #B57C1C;
+            transition: 0.1s;
+        }
+
+        .next-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #B57C1C;
+        }
+
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ffebe1 0%, #ffebe1 100%);
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #000000;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #ff4b44;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ffebe1;
+	    border: 2px solid #FFD700;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 20px;
+            color: #1B3B6F;
+        }
+
+        @media (max-width: 550px) {
+            .container {
+                padding: 20px;
+            }
+            .question-text {
+                font-size: 1.1rem;
+            }
+            .answer-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Верхняя панель -->
+    <div class="top-bar">
+        <div class="logo-container">
+            <img src="laliga.png" alt="La Liga Logo" class="logo-img" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="logo-error">⚠️ Лого</div>
+        </div>
+        <a href="index.html" class="home-btn">🏠 На главную</a>
+    </div>
+
+    <h1> УГАДАЙКА </h1>
+    <div class="sub">Проверь свои знания об Испанском футболе</div>
+
+    <div class="quiz-card">
+        <div class="question-text" id="questionText">Загрузка...</div>
+        <div class="answers" id="answersContainer"></div>
+        <div class="stats">
+            <div class="score" id="score">🎯 Очки: 0</div>
+            <div class="question-counter" id="counter">📋 Вопрос 1 / 10</div>
+            <button class="next-btn" id="nextBtn" disabled>Следующий вопрос →</button>
+        </div>
+    </div>
+
+    <div class="result" id="result" style="display: none;"></div>
+
+    <footer>
+        🏆 La Liga Quiz | Вопросы о лучшей лиге мира
+    </footer>
+</div>
+
+<script>
+    // ===== БАНК ВОПРОСОВ (можно добавлять сколько угодно) =====
+    const QUESTIONS = [
+        {
+            text: "Какая команда выиграла больше всего титулов Ла Лиги?",
+            answers: ["Барселона", "Реал Мадрид", "Атлетико Мадрид", "Атлетик Бильбао"],
+            correct: "Реал Мадрид"
+        },
+        {
+            text: "Какой клуб называют 'Los Blancos'?",
+            answers: ["Барселона", "Атлетико Мадрид", "Реал Мадрид", "Севилья"],
+            correct: "Реал Мадрид"
+        },
+        {
+            text: "Какой стадион является домашним для 'Барселоны'?",
+            answers: ["Сантьяго Бернабеу", "Ванда Метрополитано", "Камп Ноу", "Санчес Писхуан"],
+            correct: "Камп Ноу"
+        },
+        {
+            text: "Какой клуб играет на стадионе 'Сантьяго Бернабеу'?",
+            answers: ["Атлетико Мадрид", "Реал Мадрид", "Барселона", "Валенсия"],
+            correct: "Реал Мадрид"
+        },
+        {
+            text: "Какая команда выиграла Ла Лигу в сезоне 2013/14?",
+            answers: ["Барселона", "Реал Мадрид", "Атлетико Мадрид", "Севилья"],
+            correct: "Атлетико Мадрид"
+        },
+        {
+            text: "Какой клуб носит прозвище 'Львы'?",
+            answers: ["Севилья", "Атлетик Бильбао", "Вильярреал", "Валенсия"],
+            correct: "Атлетик Бильбао"
+        },
+        {
+            text: "Какой игрок забил больше всего голов за один сезон Ла Лиги?",
+            answers: ["Криштиану Роналду", "Лионель Месси", "Роберт Левандовски", "Каррим Бензема"],
+            correct: "Лионель Месси"
+        },
+        {
+            text: "Какой клуб называют 'Жёлтая субмарина'?",
+            answers: ["Валенсия", "Реал Бетис", "Вильярреал", "Сельта"],
+            correct: "Вильярреал"
+        },
+        {
+            text: "В каком городе находится клуб 'Севилья'?",
+            answers: ["Мадрид", "Барселона", "Севилья", "Валенсия"],
+            correct: "Севилья"
+        },
+        {
+            text: "Какой клуб выиграл Ла Лигу в сезоне 2023/24?",
+            answers: ["Реал Мадрид", "Барселона", "Жирона", "Атлетико Мадрид"],
+            correct: "Реал Мадрид"
+        },
+        {
+            text: "Какой цвет является основным для формы 'Реал Сосьедад'?",
+            answers: ["Красно-белый", "Сине-гранатовый", "Белый", "Сине-белый"],
+            correct: "Сине-белый"
+        },
+        {
+            text: "Какой клуб провёл больше всего сезонов в Ла Лиге?",
+            answers: ["Реал Мадрид", "Барселона", "Атлетик Бильбао", "Валенсия"],
+            correct: "Реал Мадрид"
+        }
+    ];
+
+    // Игровые переменные
+    let currentQuestions = [];     // Вопросы для текущей игры (рандомные)
+    let currentIndex = 0;          // Текущий вопрос
+    let score = 0;                 // Количество очков
+    let answered = false;          // Отвечено на текущий вопрос?
+    let totalQuestions = 10;       // Количество вопросов за игру
+
+    // DOM элементы
+    const questionText = document.getElementById('questionText');
+    const answersContainer = document.getElementById('answersContainer');
+    const nextBtn = document.getElementById('nextBtn');
+    const scoreDisplay = document.getElementById('score');
+    const counterDisplay = document.getElementById('counter');
+    const resultDiv = document.getElementById('result');
+
+    // Перемешивание массива (алгоритм Фишера-Йетса)
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // Выбор случайных вопросов из банка
+    function selectRandomQuestions() {
+        const shuffled = shuffleArray([...QUESTIONS]);
+        return shuffled.slice(0, totalQuestions);
+    }
+
+    // Перемешивание вариантов ответов
+    function shuffleAnswers(question) {
+        const shuffled = shuffleArray([...question.answers]);
+        return { ...question, answers: shuffled };
+    }
+
+    // Начать новую игру
+    function startNewGame() {
+        currentQuestions = selectRandomQuestions();
+        // Перемешиваем варианты ответов для каждого вопроса
+        currentQuestions = currentQuestions.map(q => shuffleAnswers(q));
+        currentIndex = 0;
+        score = 0;
+        answered = false;
+        resultDiv.style.display = 'none';
+        nextBtn.disabled = true;
+        updateScoreDisplay();
+        loadQuestion();
+    }
+
+    // Загрузить текущий вопрос
+    function loadQuestion() {
+        if (currentIndex >= currentQuestions.length) {
+            endGame();
+            return;
+        }
+
+        answered = false;
+        nextBtn.disabled = true;
+        
+        const question = currentQuestions[currentIndex];
+        questionText.textContent = question.text;
+        
+        // Обновляем счётчик
+        counterDisplay.textContent = `📋 Вопрос ${currentIndex + 1} / ${currentQuestions.length}`;
+        
+        // Отображаем варианты ответов
+        answersContainer.innerHTML = '';
+        question.answers.forEach(answer => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.textContent = answer;
+            btn.onclick = () => checkAnswer(btn, answer, question.correct);
+            answersContainer.appendChild(btn);
+        });
+    }
+
+    // Проверка ответа
+    function checkAnswer(btn, selected, correct) {
+        if (answered) return;
+        answered = true;
+        
+        // Отключаем все кнопки
+        const allBtns = document.querySelectorAll('.answer-btn');
+        allBtns.forEach(btn => {
+            btn.classList.add('disabled');
+        });
+        
+        // Подсвечиваем правильный и неправильный ответы
+        allBtns.forEach(btn => {
+            if (btn.textContent === correct) {
+                btn.classList.add('correct');
+            }
+        });
+        
+        if (selected === correct) {
+            btn.classList.add('correct');
+            score++;
+            updateScoreDisplay();
+            showTemporaryMessage('✅ Правильно! +1 очко', '#2a9d8f');
+        } else {
+            btn.classList.add('wrong');
+            showTemporaryMessage(`❌ Неправильно! Правильный ответ: ${correct}`, '#ff4b44');
+        }
+        
+        // Активируем кнопку "Следующий вопрос"
+        nextBtn.disabled = false;
+    }
+
+    // Временное сообщение
+    function showTemporaryMessage(message, bgColor) {
+        const oldResult = resultDiv.style.display;
+        resultDiv.textContent = message;
+        resultDiv.style.backgroundColor = bgColor;
+        resultDiv.style.color = 'white';
+        resultDiv.style.display = 'block';
+        setTimeout(() => {
+            if (resultDiv.textContent === message) {
+                resultDiv.style.display = 'none';
+            }
+        }, 1500);
+    }
+
+    // Обновить отображение очков
+    function updateScoreDisplay() {
+        scoreDisplay.textContent = `🎯 Очки: ${score}`;
+    }
+
+    // Завершение игры
+    function endGame() {
+        const percentage = Math.round((score / currentQuestions.length) * 100);
+        let message = '';
+        
+        if (percentage === 100) {
+            message = '🏆 ИДЕАЛЬНО! Ты настоящий эксперт Ла Лиги! 🏆';
+        } else if (percentage >= 70) {
+            message = '🎉 Отлично! Ты хорошо знаешь Ла Лигу! 🎉';
+        } else if (percentage >= 50) {
+            message = '👍 Неплохо! Но есть куда расти! 👍';
+        } else {
+            message = '📚 Попробуй ещё раз! Посмотри матчи Ла Лиги 📚';
+        }
+        
+        resultDiv.style.display = 'block';
+        resultDiv.style.backgroundColor = '#ff4b44';
+        resultDiv.style.color = '#ffebe1';
+        resultDiv.innerHTML = `
+            <strong>ИГРА ЗАКОНЧЕНА!</strong><br>
+            Твой результат: ${score} из ${currentQuestions.length} (${percentage}%)<br>
+            ${message}<br>
+            <button class="reset-btn" onclick="resetGame()" style="margin-top: 15px;">🔄 Сыграть снова</button>
+        `;
+        
+        questionText.textContent = 'Игра завершена!';
+        answersContainer.innerHTML = '';
+        nextBtn.disabled = true;
+    }
+
+    // Сброс игры
+    function resetGame() {
+        startNewGame();
+    }
+
+    // Следующий вопрос
+    function nextQuestion() {
+        if (!answered && currentIndex < currentQuestions.length) return;
+        currentIndex++;
+        loadQuestion();
+    }
+
+    // Обработчики событий
+    nextBtn.addEventListener('click', nextQuestion);
+    
+    // Запуск игры
+    startNewGame();
+</script>
+</body>
+</html>
