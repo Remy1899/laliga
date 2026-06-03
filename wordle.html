@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Wordle - Футболисты Ла Лиги</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff4b44 0%, #ffffff 50%, #d9403a 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border: 2px solid #FFD700;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 8px;
+            padding: 5px 12px;
+            border: 2px solid #FFD700;
+        }
+
+        .logo-img {
+            max-height: 45px;
+            width: auto;
+            display: block;
+        }
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #6c5ce7 0%, #5a4ace 100%);
+            color: white;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 1px solid #FFD700;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #000000 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .sub {
+            text-align: center;
+            color: #ff4b44;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #ddd;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ff4b44, #d9403a);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #1B3B6F;
+        }
+
+        .game-board {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .word-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .letter-cell {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .letter-cell.correct {
+            background: #ff4b44;
+            border-color: #1e6b60;
+            color: white;
+        }
+
+        .letter-cell.present {
+            background: #ffebe1;
+            border-color: #c49a2b;
+            color: #1B3B6F;
+        }
+
+        .letter-cell.absent {
+            background: #6c757d;
+            border-color: #5a6268;
+            color: white;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .key {
+            background: #e9ecef;
+            border: none;
+            padding: 12px 10px;
+            min-width: 40px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .key:active {
+            transform: scale(0.95);
+        }
+
+        .key.correct {
+            background: #2a9d8f;
+            color: white;
+        }
+
+        .key.present {
+            background: #FFD700;
+            color: #1B3B6F;
+        }
+
+        .key.absent {
+            background: #6c757d;
+            color: white;
+        }
+
+        .key.delete, .key.enter {
+            min-width: 70px;
+        }
+
+        .key.delete {
+            background: #ff4b44;
+            color: white;
+        }
+
+        .key.enter {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .status.warning {
+            background: #ff4b44;
+            color: white;
+        }
+
+        .status.success {
+            background: #ff4b44;
+            color: white;
+        }
+
+        .status.level-complete {
+            background: #ff4b44;
+            color: #1B3B6F;
+        }
+
+        .next-level-btn {
+            background: linear-gradient(135deg, #ff4b44 0%, #d9403a 100%);
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #FFFFFF;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #e9c46a 0%, #d4a373 100%);
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #2c3e50;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ff4b44;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 20px;
+            color: #000000;
+        }
+
+        @media (max-width: 500px) {
+            .letter-cell {
+                width: 42px;
+                height: 42px;
+                font-size: 1.3rem;
+            }
+            .key {
+                padding: 8px 6px;
+                min-width: 32px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <div class="logo-container">
+            <img src="laliga.png" alt="La Liga Logo" class="logo-img" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        </div>
+        <a href="index.html" class="home-btn">🏠 На главную</a>
+    </div>
+
+    <h1> WORDLE </h1>
+    <div class="sub">Угадай фамилию футболиста Ла Лиги(бывший или нынешний)</div>
+
+    <div class="progress-container">
+        <div class="level-info">
+            <span>📊 Уровень <span id="currentLevelNum">1</span> / <span id="totalLevels"></span></span>
+            <span>⭐ Слово из <span id="wordLength"></span> букв</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <div class="game-board" id="gameBoard"></div>
+
+    <div class="keyboard" id="keyboard"></div>
+
+    <div class="status" id="statusMessage">✨ Введи фамилию футболиста ✨</div>
+
+    <footer>
+        🏆 5 попыток на каждое слово | Ла Лига
+    </footer>
+</div>
+
+<div class="save-indicator" id="saveIndicator">💾 Прогресс сохранён</div>
+
+<script>
+    // ===== УРОВНИ (фиксированная последовательность) =====
+    const LEVELS = [
+        { word: "МЕССИ", hint: "Аргентинец, лучший игрок в истории Барселоны, 10-й номер" },
+        { word: "РОНАЛДУ", hint: "Португалец, легенда Реал Мадрида, 7-й номер" },
+        { word: "МОДРИЧ", hint: "Хорват, обладатель Золотого мяча 2018" },
+        { word: "БЕНЗЕМА", hint: "Француз, капитан Реал Мадрида до 2023" },
+        { word: "ИНЬЕСТА", hint: "Испанец, автор победного гола в финале ЧМ-2010" },
+        { word: "КАСИЛЬЯС", hint: "Легендарный вратарь Реал Мадрида и сборной Испании" },
+        { word: "СУАРЕС", hint: "Уругваец, один из лучших нападающих в истории Ла Лиги" },
+        { word: "ГРИЗМАНН", hint: "Француз, чемпион мира 2018, играл за Атлетико и Барселону" },
+        { word: "РАМОС", hint: "Испанец, легендарный защитник Реал Мадрида" },
+        { word: "ЛЕВАНДОВСКИ", hint: "Поляк, лучший бомбардир сезона 2022/23 в Барселоне" },
+	{ word: "КОКЕ", hint: "Легендарный игрок в истории Атлетико" },
+	{ word: "ГАВИ", hint: "Игрок из Ла Масии, рвал кресты" },
+	{ word: "ДЕМБЕЛЕ", hint: "Недавний обладатель золотого мяча" },
+	{ word: "МБАППЕ", hint: "Француз, приехавший из Парижа" },
+	{ word: "РОДРИ", hint: "Из-за него отменилась вечеринка Вини" },
+	{ word: "АРАУХО", hint: "Mr. Красная карточка в важных матчах" },
+	{ word: "ГАРСИЯ", hint: "Одна из самых популярных фамилий в Испании" },
+	{ word: "ЗИДАН", hint: "У него есть легендарный удар головой, но не в мяч" },
+	{ word: "КУНДЕ", hint: "Модник" },
+	{ word: "ЯМАЛЬ", hint: "Будущее Барселоны" },
+	{ word: "РОНАЛДО", hint: "Играл за Барселону и Реал" },
+	{ word: "АРТЕТА", hint: "Убийца футбола" }
+    ];
+
+    // ===== СПИСОК РАЗРЕШЁННЫХ ФАМИЛИЙ =====
+    const ALLOWED_WORDS = [
+        "МЕССИ", "РОНАЛДУ", "МОДРИЧ", "БЕНЗЕМА", "ИНЬЕСТА",
+        "КАСИЛЬЯС", "СУАРЕЗ", "ГРИЗМАНН", "РАМОС", "ЛЕВАНДОВСКИ",
+        "НЕЙМАР", "БЕКХЕМ", "ЗИДАН", "ФИГУ", "КРООС",
+        "АЛВЕС", "ПУЙОЛЬ", "ХАВИ", "БУСКЕТС", "ПИКЕ", "ЯМАЛЬ",
+        "АГУЭРО", "ВИЛЬЯ", "ТОРРЕС", "ФАБРЕГАС", "КОКЕ",
+        "ОБЛАК", "ДИМАРИЯ", "ОЗИЛ", "БЕЙЛ", "ГАРСИЯ", "БАЛЬДЕ", "КУНДЕ",
+	"РАФИНЬЯ", "ВИНИСИУС", "МБАППЕ", "КУБАРСИ", "МАРТИН", "РОНАЛДО",
+	"РОНАЛДИНЬО", "ДЕМБЕЛЕ", "КОУТИНЬО", "ФЕРМИН", "УМТИТИ", "ТЕРШТЕГЕН",
+	"ФАБРЕГАС", "ТЬЯГО", "ФЕЛИКС", "ПЕДРО", "ДЕКУ", "АЛЬБА", "РАКИТИЧ",
+	"АНРИ", "РЕШФОРД", "АГУЭРО", "ЭТОО", "ДЕЙОНГ", "ГАВИ", "КАНСЕЛУ", "РИВАЛДО",
+	"РОБЕРТО", "ОЛЬМО", "ВАЛЬДЕС", "ОБАМЕЯНГ", "РЕЙНА", "ФАТИ", "АРТУР", "РОМАРИО",
+	"ИБРАГИМОВИЧ", "САНЧЕЗ", "ПЬЯНИЧ", "АРАУХО", "ГЮНДОГАН", "ДЗАМБРОТТА", "ТУРЕ", "ДЕПАЙ",
+	"АЛОНСО", "ВИДАЛЬ", "ГОРДОН", "КРИСТЕНСЕН", "АЛЬКАСЕР", "ЛАНГЛЕ", "КУАРЕЖМА",
+	"МАСКЕРАНО", "КЕСЬЕ", "ПАУЛИНЬО", "ПЕТИ", "ГОМЕШ", "АБИДАЛЬ", "ТЮРАМ", "ТУРАН", 
+	"ДИНЬ", "МАЛКОМ", "БАРТРА", "БЕЛЕТИ", "ГОНСАЛЕЗ", "МОТТА", "ШЧЕНСНЫ", "БЛАН",
+	"СЕМЕДО", "МАРКЕС", "ДАВИДС", "РИКЕЛЬМЕ", "КРОЙФ", "ТРИНКАУ", "БЕЛЬЕРИН", "ТРАОРЕ",
+	"ЭМЕРСОН", "РОКЕ", "КЕЙТА", "КРКИЧ", "САВИОЛА", "КУМАН", "ДЕУЛОФЕУ", "ГЛЕБ", "ВЕРМАЛЕН",
+	"ТОДИБО", "МУНИР", "МАРТИНЕЗ", "АФЕЛАЙ", "КЛЮВЕРТ", "ДЕСТ", "ЛАРССОН", "КАСАДО", "БЕРНАЛЬ",
+	"АБДЕ", "ГВАРДИОЛА", "ФИРПО", "ЭНРИКЕ", "МОРИБА", "МИНГЕСА", "МУНЬОС", "АЛЬТИМИРА", 
+	"МОРЕНО", "АРТЕТА", "ТЕНАС", "ПЕНЬЯ", "ПЕДРИ", "БАРДАГЖИ", "КУРТУА", "ЛУНИН", "ХЕЙСЕН",
+	"ТРЕНТ", "КАРРЕРАС", "МИЛИТАО", "АСЕНСИО", "РЮДИГЕР", "МЕНДИ", "КАРВАХАЛЬ", "АЛАБА",
+	"БЕЛЛИНГЕМ", "ВАЛЬВЕРДЕ", "ГЮЛЕР", "ЧУАМЕНИ", "КАМАВИНГА", "ПИТАРЧ", "СЕБАЛЬОС", "МБАППЕ",
+	"РОДРИГО", "МАСТАНТУОНО", "БРАИМ", "КАКА", "АЗАР", "ВАРАН", "ИСКО", "РАМОС", "КАЗЕМИРО",
+	"МАРСЕЛО", "ХАКИМИ", "ХАМЕС", "САУЛЬ", "ОДЕГАР", "МОРАТА", "ЛЬОРЕНТЕ", "МАТА", "НАЧО",
+	"ПАЗ", "КАНАВАРО", "КОВАЧИЧ", "ИГУАИН", "КЕПА", "КАРЛОС", "ФАБИНЬО", "ЙОВИЧ", "ПЕПЕ",
+	"АЛЬБИОЛЬ", "ЭРНАНДЕЗ", "ХЕДИРА", "АРБЕЛОА", "КУБО", "ВАСКЕС", "ГЕНТО", "РОББЕН", 
+	"ЗЕЕДОРФ", "РАУЛЬ", "КАРВАЛЬО", "АНЕЛЬКА", "СНЕЙДЕР", "МОРЬЕНТЕС", "БАРРИОС", "ЭНДРИК",
+	"АРЕОЛЯ", "ГУТИ", "ЭССЬЕН", "ЛУИС", "НАВАС", "КОЕНТРАО", "ПАРЕХО", "НЕГРЕДО", "ОДРИОЗОЛА",
+	"ОУЭН", "ВАННИСТЕЛРОЙ", "САРАБИЯ", "ГУТЬЕРЕЗ", "ИЛЛЬЯРРАМЕНДИ", "РЕГИЛОН", "РОБИНЬО",
+	"ПУШКАШ", "МАРАДОНА", "МАКЕЛЕЛЕ", "СОРИЯ", "МАЙОРАЛ", "ХОСЕЛУ", "ЧЕРЫШЕВ", "КАРПИН",
+	"ЗАХАРЯН", "МОСТОВОЙ", "МАРИН", "КАНАЛЕС", "РОДРИ", "ЛЕМАР", "МОЛИНА", "ДЕХЕА", "ХИМЕНЕС",
+	"КОРРЕА", "ДЕПАУЛЬ", "ФАЛЬКАО", "БАЭНА", "ЛУКМАН", "КОСТА", "КУНЬЯ", "АСПИЛИКУЭТА",
+	"КАПДЕВИЛЬЯ", "ПАРТЕЙ", "ГАЛЛАХЕР", "ЖОТА", "ЛЕНОРМАН", "ВИТОЛО", "ТОРРЕЙРА", "ГОДИН",
+	"АЛЬМАДА", "РАСПАДОРИ", "МАНДЖУКИЧ", "ГАМЕЙРО", "САВИЧ", "КАРРАСКО", "ЛОДИ",
+	"АГЕХОВА", "БАНЕГА", "ФЕЛИПЕ", "ФОРЛАН", "АЛЬДЕРВЕЙРЕЛЬД", "ВИТСЕЛЬ", "ЛИНО", "ГОНСАЛЕЗ",
+	"СИМЕОНЕ", "МУССО", "РУДЖЕРИ", "КОНДОГБИА", "РУДЖЕРИ", "ВИЕРИ", "МИРАНДА", "ТРИПЬЕР",
+	"ГАНЦКО", "МАРТИНШ", "АСЕНХО", "СИЛЛЕСЕН", "НЕТУ", "БУНУ", "ВРСАЛЬКО", "СЕРЛОТ", "РЕЙНИЛДУ",
+	"РИКЕЛЬМЕ", "ПУБИЛЬ", "МЕНДЕШ", "КАРДОЗО", "АНТОНИ", "МЕНДОЗА", "ВАСС", "ГАЛАН", "ВАРГАС",
+	"АЛЬВАРЕС", "ВЕЙГА", "КОШТА", "КОСТА", "МАРИН", "НАВАРРО", "ФОЙТ", "КАРДОНА", "МОУРИНЬЮ",
+	"ГИЙЕ", "КОМЕСАНЬЯ", "МОЛЕЙРО", "БЬЮКЕНЕН", "МИКАУТАДЗЕ", "МАМАРДАШВИЛИ", "ПЕРЕЗ",
+	"МОРЕНО", "ОЛУВАСЕЙИ", "СИМОН", "ВИВИАН", "ПАРЕДЕС", "ЛЯПОРТ", "БЕРЧИЧЕ", "ГОРОСАБЕЛЬ",
+	"ВЕСГА", "ХАУРЕГИСАР", "ПРАДОС", "САНСЕТ", "ГОМЕШ", "ГОМЕС", "УИЛЬЯМС", "БЕРЕНГЕР", "ГУРУЗЕТА",
+	"МЕРИНО", "СУБИМЕНДИ", "РЕМИРО", "ЗУБЕЛЬДИА", "ЧАЛЕТАЦАР", "ЭЛЮСТОНДО", "АРАМБУРУ",
+	"ГОРОТЧАТЕГИ", "ТУРЬЕНТЕС", "СУЧИЧ", "ЭРРЕРА", "СОЛЕР", "МЕНДЕЗ", "МЕНДЕС", "МАРИН",
+	"БАРРЕНЕЧЕА", "ГЕДЕШ", "УЭСЛИ", "ОЯРСАБАЛЬ", "ОСКАРССОН", "РАДУ", "РОДРИГЕЗ", "РОДРИГЕС",
+	"СТАРФЕЛЬТ", "АЙДУ", "КАРРЕЙРА", "МИГЕЛЬ", "ВЕСИНО", "МОРИБА", "ЧЕРВИ", "ДУРАН", "ИГЛЕСИАС",
+	"АСПАС", "ВАЛЕС", "ЛОПЕС", "ЛОПЕЗ", "НАТАН", "ФИРПО", "РОДРИГЕЗ", "АМРАБАТ", "РОКА",
+	"ФИДАЛЬГО", "ЛОЧЕЛЬСО", "ИСКО", "РУИБАЛЬ", "КУЧО", "АВИЛА", "БАКАМБУ", "РОМЕРО", "РЕЙС",
+	"РАТИУ", "ЭЙОНГ", "БОЙОМО", "ВАНАТ", "САНЧЕЗ", "САНЧЕС", "ЦЫГАНКОВ", "ВИРГИЛИ", "ЭЧЕВЕРИ",
+	"СВЕДБЕРГ"
+    ];
+
+    const MAX_ATTEMPTS = 5;
+    let currentLevelIndex = 0;
+    let totalLevels = LEVELS.length;
+    
+    let targetWord = "";
+    let currentGuess = "";
+    let attempts = [];
+    let gameOver = false;
+    let levelComplete = false;
+    let keyboardState = {};
+
+    const gameBoard = document.getElementById('gameBoard');
+    const keyboardDiv = document.getElementById('keyboard');
+    const statusMessage = document.getElementById('statusMessage');
+    const currentLevelNumSpan = document.getElementById('currentLevelNum');
+    const totalLevelsSpan = document.getElementById('totalLevels');
+    const wordLengthSpan = document.getElementById('wordLength');
+    const progressFill = document.getElementById('progressFill');
+    const saveIndicator = document.getElementById('saveIndicator');
+
+    const KEYBOARD_ROWS = [
+        ["Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х", "Ъ"],
+        ["Ф", "Ы", "В", "А", "П", "Р", "О", "Л", "Д", "Ж", "Э"],
+        ["Я", "Ч", "С", "М", "И", "Т", "Ь", "Б", "Ю"],
+        ["DELETE", "ENTER"]
+    ];
+
+    // ===== СОХРАНЕНИЕ ПРОГРЕССА =====
+    function saveProgress() {
+        const saveData = {
+            currentLevelIndex: currentLevelIndex,
+            attempts: attempts,
+            currentGuess: currentGuess,
+            gameOver: gameOver,
+            levelComplete: levelComplete,
+            keyboardState: keyboardState,
+            targetWord: targetWord,
+            savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('wordle_progress', JSON.stringify(saveData));
+        
+        saveIndicator.style.opacity = '1';
+        setTimeout(() => {
+            saveIndicator.style.opacity = '0';
+        }, 1000);
+    }
+
+    // ===== ЗАГРУЗКА ПРОГРЕССА =====
+    function loadProgress() {
+        const saved = localStorage.getItem('wordle_progress');
+        if (!saved) return false;
+        
+        try {
+            const data = JSON.parse(saved);
+            
+            if (data.currentLevelIndex !== undefined && data.currentLevelIndex <= totalLevels) {
+                // Проверяем, был ли пройден текущий уровень
+                const wasLevelComplete = data.levelComplete === true;
+                
+                if (wasLevelComplete && data.currentLevelIndex + 1 < totalLevels) {
+                    // Если уровень был пройден - переходим на следующий
+                    currentLevelIndex = data.currentLevelIndex + 1;
+                    levelComplete = false;
+                    gameOver = false;
+                    attempts = [];
+                    currentGuess = "";
+                    keyboardState = {};
+                } else if (wasLevelComplete && data.currentLevelIndex + 1 >= totalLevels) {
+                    // Если это был последний уровень - показываем экран завершения
+                    currentLevelIndex = totalLevels;
+                    showCompletionScreen();
+                    return true;
+                } else {
+                    // Восстанавливаем обычный прогресс
+                    currentLevelIndex = data.currentLevelIndex;
+                    attempts = data.attempts || [];
+                    currentGuess = data.currentGuess || "";
+                    gameOver = data.gameOver || false;
+                    levelComplete = data.levelComplete || false;
+                    keyboardState = data.keyboardState || {};
+                }
+                
+                if (data.targetWord && !levelComplete) {
+                    targetWord = data.targetWord;
+                }
+                
+                statusMessage.innerHTML = `🔄 Прогресс загружен! Уровень ${currentLevelIndex + 1}`;
+                setTimeout(() => {
+                    if (statusMessage.innerHTML.includes('Прогресс загружен')) {
+                        statusMessage.className = 'status';
+                        if (!levelComplete && !gameOver && currentLevelIndex < totalLevels) {
+                            statusMessage.innerHTML = `✨ Уровень ${currentLevelIndex + 1}. ${LEVELS[currentLevelIndex]?.hint || ''} ✨`;
+                        }
+                    }
+                }, 2000);
+                
+                return true;
+            }
+        } catch(e) {
+            console.log('Ошибка загрузки прогресса:', e);
+        }
+        return false;
+    }
+
+    function loadLevel() {
+        if (currentLevelIndex >= totalLevels) {
+            showCompletionScreen();
+            return;
+        }
+
+        const level = LEVELS[currentLevelIndex];
+        targetWord = level.word;
+        
+        currentLevelNumSpan.textContent = currentLevelIndex + 1;
+        totalLevelsSpan.textContent = totalLevels;
+        wordLengthSpan.textContent = targetWord.length;
+        
+        const progressPercent = (currentLevelIndex / totalLevels) * 100;
+        progressFill.style.width = `${progressPercent}%`;
+        
+        if (!levelComplete && !gameOver) {
+            statusMessage.className = 'status';
+            statusMessage.innerHTML = `✨ Уровень ${currentLevelIndex + 1}. ${level.hint} ✨`;
+        }
+        
+        renderBoard();
+        renderKeyboard();
+        saveProgress();
+    }
+
+    function checkWord(word) {
+        const result = Array(word.length).fill('absent');
+        const targetLetters = targetWord.split('');
+        const wordLetters = word.split('');
+        
+        for (let i = 0; i < word.length; i++) {
+            if (wordLetters[i] === targetLetters[i]) {
+                result[i] = 'correct';
+                targetLetters[i] = null;
+                wordLetters[i] = null;
+            }
+        }
+        
+        for (let i = 0; i < word.length; i++) {
+            if (wordLetters[i] !== null) {
+                const index = targetLetters.indexOf(wordLetters[i]);
+                if (index !== -1) {
+                    result[i] = 'present';
+                    targetLetters[index] = null;
+                }
+            }
+        }
+        
+        return result;
+    }
+
+    function renderBoard() {
+        gameBoard.innerHTML = '';
+        const wordLen = targetWord.length;
+        
+        for (let i = 0; i < MAX_ATTEMPTS; i++) {
+            const row = document.createElement('div');
+            row.className = 'word-row';
+            
+            if (i < attempts.length) {
+                const word = attempts[i];
+                const result = checkWord(word);
+                for (let j = 0; j < wordLen; j++) {
+                    const letter = word[j] || '';
+                    const cell = createLetterCell(letter, result[j]);
+                    row.appendChild(cell);
+                }
+            } 
+            else if (i === attempts.length && !gameOver && !levelComplete) {
+                for (let j = 0; j < wordLen; j++) {
+                    const letter = currentGuess[j] || '';
+                    const cell = createLetterCell(letter, null);
+                    row.appendChild(cell);
+                }
+            }
+            else {
+                for (let j = 0; j < wordLen; j++) {
+                    const cell = createLetterCell('', null);
+                    row.appendChild(cell);
+                }
+            }
+            
+            gameBoard.appendChild(row);
+        }
+    }
+
+    function createLetterCell(letter, status) {
+        const cell = document.createElement('div');
+        cell.className = 'letter-cell';
+        cell.textContent = letter;
+        if (status === 'correct') cell.classList.add('correct');
+        else if (status === 'present') cell.classList.add('present');
+        else if (status === 'absent') cell.classList.add('absent');
+        return cell;
+    }
+
+    function updateKeyboardState(word, result) {
+        for (let i = 0; i < word.length; i++) {
+            const letter = word[i];
+            const currentStatus = keyboardState[letter];
+            const newStatus = result[i];
+            
+            if (!currentStatus || 
+                newStatus === 'correct' ||
+                (newStatus === 'present' && currentStatus !== 'correct')) {
+                keyboardState[letter] = newStatus;
+            }
+        }
+        renderKeyboard();
+    }
+
+    function renderKeyboard() {
+        keyboardDiv.innerHTML = '';
+        
+        KEYBOARD_ROWS.forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'keyboard-row';
+            
+            row.forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = 'key';
+                btn.textContent = key;
+                
+                if (key === 'DELETE') {
+                    btn.classList.add('delete');
+                    btn.onclick = () => handleDelete();
+                } else if (key === 'ENTER') {
+                    btn.classList.add('enter');
+                    btn.onclick = () => handleEnter();
+                } else {
+                    const status = keyboardState[key];
+                    if (status === 'correct') btn.classList.add('correct');
+                    else if (status === 'present') btn.classList.add('present');
+                    else if (status === 'absent') btn.classList.add('absent');
+                    btn.onclick = () => handleLetter(key);
+                }
+                
+                rowDiv.appendChild(btn);
+            });
+            
+            keyboardDiv.appendChild(rowDiv);
+        });
+    }
+
+    function handleLetter(letter) {
+        if (gameOver || levelComplete) return;
+        if (currentGuess.length < targetWord.length) {
+            currentGuess += letter;
+            renderBoard();
+            saveProgress();
+        }
+    }
+
+    function handleDelete() {
+        if (gameOver || levelComplete) return;
+        if (currentGuess.length > 0) {
+            currentGuess = currentGuess.slice(0, -1);
+            renderBoard();
+            saveProgress();
+        }
+    }
+
+    function handleEnter() {
+        if (gameOver || levelComplete) return;
+        
+        if (currentGuess.length !== targetWord.length) {
+            statusMessage.className = 'status warning';
+            statusMessage.innerHTML = `⚠️ Должно быть ${targetWord.length} букв! ⚠️`;
+            setTimeout(() => {
+                if (statusMessage.innerHTML.includes(`${targetWord.length} букв`)) {
+                    statusMessage.className = 'status';
+                    statusMessage.innerHTML = `✨ Уровень ${currentLevelIndex + 1}. ${LEVELS[currentLevelIndex].hint} ✨`;
+                }
+            }, 2000);
+            return;
+        }
+        
+        if (!ALLOWED_WORDS.includes(currentGuess)) {
+            statusMessage.className = 'status warning';
+            statusMessage.innerHTML = `❌ Фамилии "${currentGuess}" нет в списке! Попробуй другую ❌`;
+            setTimeout(() => {
+                if (statusMessage.innerHTML.includes('нет в списке')) {
+                    statusMessage.className = 'status';
+                    statusMessage.innerHTML = `✨ Уровень ${currentLevelIndex + 1}. ${LEVELS[currentLevelIndex].hint} ✨`;
+                }
+            }, 2000);
+            return;
+        }
+        
+        const result = checkWord(currentGuess);
+        attempts.push(currentGuess);
+        updateKeyboardState(currentGuess, result);
+        
+        if (currentGuess === targetWord) {
+            // Отмечаем, что уровень пройден
+            levelComplete = true;
+            
+            // Сохраняем прогресс сразу
+            saveProgress();
+            
+            statusMessage.className = 'status level-complete';
+            statusMessage.innerHTML = `🎉 ПОБЕДА! Ты угадал "${targetWord}" 🎉`;
+            
+            // Показываем кнопку "Следующий уровень"
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'next-level-btn';
+            nextBtn.textContent = currentLevelIndex + 1 === totalLevels ? '🏆 Завершить игру' : '➡ Следующий уровень';
+            nextBtn.onclick = () => {
+                // Переход на следующий уровень
+                if (currentLevelIndex + 1 < totalLevels) {
+                    currentLevelIndex++;
+                    levelComplete = false;
+                    gameOver = false;
+                    attempts = [];
+                    currentGuess = "";
+                    keyboardState = {};
+                    loadLevel();
+                } else {
+                    showCompletionScreen();
+                }
+                nextBtn.remove();
+                saveProgress();
+            };
+            
+            // Удаляем старую кнопку, если есть
+            const oldBtn = document.querySelector('.next-level-btn');
+            if (oldBtn) oldBtn.remove();
+            document.querySelector('.container').appendChild(nextBtn);
+        }  
+        else if (attempts.length === MAX_ATTEMPTS) {
+            gameOver = true;
+            statusMessage.className = 'status warning';
+            statusMessage.innerHTML = `😔 Игра окончена! Загаданная фамилия: ${targetWord} 😔`;
+            
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'reset-btn';
+            resetBtn.textContent = '🔄 Пройти уровень заново';
+            resetBtn.onclick = () => {
+                gameOver = false;
+                levelComplete = false;
+                attempts = [];
+                currentGuess = "";
+                keyboardState = {};
+                loadLevel();
+                const oldBtn = document.querySelector('.next-level-btn');
+                if (oldBtn) oldBtn.remove();
+                resetBtn.remove();
+                saveProgress();
+            };
+            document.querySelector('.container').appendChild(resetBtn);
+        }
+        
+        currentGuess = '';
+        renderBoard();
+        saveProgress();
+        
+        if (!levelComplete && !gameOver) {
+            statusMessage.className = 'status';
+            statusMessage.innerHTML = `✨ Осталось попыток: ${MAX_ATTEMPTS - attempts.length}. ${LEVELS[currentLevelIndex].hint} ✨`;
+        }
+    }
+
+    function showCompletionScreen() {
+        gameBoard.innerHTML = '';
+        keyboardDiv.innerHTML = '';
+        
+        statusMessage.className = 'status success';
+        statusMessage.innerHTML = '🎉 Ты прошёл все уровни! Жди обновления 🎉';
+        
+        const restartBtn = document.createElement('button');
+        restartBtn.className = 'next-level-btn';
+        restartBtn.textContent = '🔄 Пройти заново';
+        restartBtn.onclick = () => {
+            localStorage.removeItem('wordle_progress');
+            currentLevelIndex = 0;
+            levelComplete = false;
+            gameOver = false;
+            attempts = [];
+            currentGuess = "";
+            keyboardState = {};
+            loadLevel();
+            restartBtn.remove();
+            const oldReset = document.querySelector('.reset-btn');
+            if (oldReset) oldReset.remove();
+        };
+        const oldBtn = document.querySelector('.next-level-btn');
+        if (oldBtn) oldBtn.remove();
+        const oldReset = document.querySelector('.reset-btn');
+        if (oldReset) oldReset.remove();
+        document.querySelector('.container').appendChild(restartBtn);
+    }
+
+    function handlePhysicalKeyboard(e) {
+        if (gameOver || levelComplete) return;
+        
+        const key = e.key.toUpperCase();
+        
+        if (/[А-ЯЁ]/i.test(key) && key.length === 1) {
+            handleLetter(key);
+        } else if (key === 'ENTER') {
+            handleEnter();
+        } else if (key === 'BACKSPACE') {
+            handleDelete();
+        }
+    }
+
+    function init() {
+        totalLevelsSpan.textContent = totalLevels;
+        
+        const hasProgress = loadProgress();
+        
+        if (!hasProgress) {
+            currentLevelIndex = 0;
+            attempts = [];
+            currentGuess = "";
+            gameOver = false;
+            levelComplete = false;
+            keyboardState = {};
+        }
+        
+        const level = LEVELS[currentLevelIndex];
+        if (level) {
+            targetWord = level.word;
+        }
+        
+        currentLevelNumSpan.textContent = currentLevelIndex + 1;
+        wordLengthSpan.textContent = targetWord ? targetWord.length : LEVELS[0].word.length;
+        
+        if (!levelComplete && !gameOver && currentLevelIndex < totalLevels) {
+            statusMessage.className = 'status';
+            statusMessage.innerHTML = `✨ Уровень ${currentLevelIndex + 1}. ${LEVELS[currentLevelIndex].hint} ✨`;
+        }
+        
+        renderBoard();
+        renderKeyboard();
+        
+        window.addEventListener('keydown', handlePhysicalKeyboard);
+        
+        window.addEventListener('beforeunload', () => {
+            saveProgress();
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
