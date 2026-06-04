@@ -141,8 +141,8 @@
             text-transform: uppercase;
             flex-shrink: 0;
             transition: all 0.05s ease;
-            min-width: 16px;
-            min-height: 16px;
+            min-width: 14px;
+            min-height: 14px;
         }
 
         .letter-cell.correct {
@@ -536,6 +536,7 @@
     let gameOver = false;
     let levelComplete = false;
     let keyboardState = {};
+    let currentWordLength = 0; // для отслеживания изменения длины слова
 
     const gameBoard = document.getElementById('gameBoard');
     const keyboardDiv = document.getElementById('keyboard');
@@ -553,13 +554,18 @@
         ["DELETE", "ENTER"]
     ];
 
-    // ===== ДИНАМИЧЕСКАЯ АДАПТАЦИЯ РАЗМЕРА ЯЧЕЕК (без скролла) =====
-    function adaptWordLength(wordLen) {
+    // ===== ДИНАМИЧЕСКАЯ АДАПТАЦИЯ РАЗМЕРА ЯЧЕЕК =====
+    function adaptWordLength(wordLen, force = false) {
+        // Если длина слова не изменилась и не принудительно - пропускаем
+        if (currentWordLength === wordLen && !force) return;
+        
         const gameBoardEl = document.getElementById('gameBoard');
         if (!gameBoardEl) return;
         
         const firstRow = document.querySelector('.word-row');
         if (!firstRow) return;
+        
+        currentWordLength = wordLen;
         
         const containerWidth = gameBoardEl.clientWidth;
         
@@ -688,6 +694,12 @@
         }
         renderBoard();
         renderKeyboard();
+        
+        // Адаптируем размер под новое слово
+        setTimeout(() => {
+            adaptWordLength(targetWord.length, true);
+        }, 50);
+        
         saveProgress();
     }
 
@@ -742,9 +754,7 @@
             }
             gameBoard.appendChild(row);
         }
-        setTimeout(() => {
-            adaptWordLength(targetWord.length);
-        }, 50);
+        // НЕ вызываем адаптацию здесь - она только при смене уровня
     }
 
     function createLetterCell(letter, status) {
@@ -964,16 +974,17 @@
         renderBoard();
         renderKeyboard();
         
+        // Адаптируем размер при загрузке
+        setTimeout(() => {
+            adaptWordLength(targetWord.length, true);
+        }, 150);
+        
         window.addEventListener('keydown', handlePhysicalKeyboard);
         window.addEventListener('resize', () => {
             setTimeout(() => {
-                adaptWordLength(targetWord.length);
+                adaptWordLength(targetWord.length, true);
             }, 100);
         });
-        
-        setTimeout(() => {
-            adaptWordLength(targetWord.length);
-        }, 150);
         
         window.addEventListener('beforeunload', () => {
             saveProgress();
