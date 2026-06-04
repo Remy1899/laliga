@@ -536,7 +536,7 @@
     let gameOver = false;
     let levelComplete = false;
     let keyboardState = {};
-    let currentWordLength = 0; // для отслеживания изменения длины слова
+    let currentWordLength = 0;
 
     const gameBoard = document.getElementById('gameBoard');
     const keyboardDiv = document.getElementById('keyboard');
@@ -556,20 +556,15 @@
 
     // ===== ДИНАМИЧЕСКАЯ АДАПТАЦИЯ РАЗМЕРА ЯЧЕЕК =====
     function adaptWordLength(wordLen, force = false) {
-        // Если длина слова не изменилась и не принудительно - пропускаем
         if (currentWordLength === wordLen && !force) return;
+        
+        currentWordLength = wordLen;
         
         const gameBoardEl = document.getElementById('gameBoard');
         if (!gameBoardEl) return;
         
-        const firstRow = document.querySelector('.word-row');
-        if (!firstRow) return;
-        
-        currentWordLength = wordLen;
-        
         const containerWidth = gameBoardEl.clientWidth;
         
-        // Динамические отступы: чем длиннее слово, тем меньше отступ
         let gap = 8;
         if (wordLen >= 10) gap = 5;
         if (wordLen >= 12) gap = 4;
@@ -594,7 +589,6 @@
         
         const cellSize = Math.max(14, bestSize);
         
-        // Применяем отступы к строкам
         const allRows = document.querySelectorAll('.word-row');
         allRows.forEach(row => {
             row.style.gap = `${gap}px`;
@@ -695,7 +689,6 @@
         renderBoard();
         renderKeyboard();
         
-        // Адаптируем размер под новое слово
         setTimeout(() => {
             adaptWordLength(targetWord.length, true);
         }, 50);
@@ -754,7 +747,6 @@
             }
             gameBoard.appendChild(row);
         }
-        // НЕ вызываем адаптацию здесь - она только при смене уровня
     }
 
     function createLetterCell(letter, status) {
@@ -931,7 +923,7 @@
             const oldReset = document.querySelector('.reset-btn');
             if (oldReset) oldReset.remove();
         };
-        const oldBtn = document.querySelector('.next-level-btn');
+        const oldBtn = document.querySelector('next-level-btn');
         if (oldBtn) oldBtn.remove();
         const oldReset = document.querySelector('.reset-btn');
         if (oldReset) oldReset.remove();
@@ -974,7 +966,6 @@
         renderBoard();
         renderKeyboard();
         
-        // Адаптируем размер при загрузке
         setTimeout(() => {
             adaptWordLength(targetWord.length, true);
         }, 150);
