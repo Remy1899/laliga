@@ -126,9 +126,9 @@
 
         .word-row {
             display: flex;
-            gap: 8px;
             justify-content: center;
             flex-wrap: nowrap;
+            transition: gap 0.1s ease;
         }
 
         .letter-cell {
@@ -141,6 +141,8 @@
             text-transform: uppercase;
             flex-shrink: 0;
             transition: all 0.05s ease;
+            min-width: 16px;
+            min-height: 16px;
         }
 
         .letter-cell.correct {
@@ -560,11 +562,17 @@
         if (!firstRow) return;
         
         const containerWidth = gameBoardEl.clientWidth;
-        const gap = 8;
         
-        let left = 20;
+        // Динамические отступы: чем длиннее слово, тем меньше отступ
+        let gap = 8;
+        if (wordLen >= 10) gap = 5;
+        if (wordLen >= 12) gap = 4;
+        if (wordLen >= 14) gap = 3;
+        if (wordLen >= 16) gap = 2;
+        
+        let left = 14;
         let right = 50;
-        let bestSize = 20;
+        let bestSize = 14;
         
         while (left <= right) {
             const mid = Math.floor((left + right) / 2);
@@ -578,16 +586,19 @@
             }
         }
         
-        const cellSize = bestSize;
+        const cellSize = Math.max(14, bestSize);
         
+        // Применяем отступы к строкам
         const allRows = document.querySelectorAll('.word-row');
         allRows.forEach(row => {
+            row.style.gap = `${gap}px`;
             const cells = row.querySelectorAll('.letter-cell');
             cells.forEach(cell => {
                 cell.style.width = `${cellSize}px`;
                 cell.style.height = `${cellSize}px`;
-                cell.style.fontSize = `${Math.floor(cellSize * 0.5)}px`;
-                cell.style.borderRadius = `${Math.floor(cellSize * 0.15)}px`;
+                cell.style.fontSize = `${Math.floor(cellSize * 0.4)}px`;
+                cell.style.borderRadius = `${Math.floor(cellSize * 0.12)}px`;
+                cell.style.borderWidth = `${Math.max(1, Math.floor(cellSize * 0.05))}px`;
             });
         });
     }
@@ -733,7 +744,7 @@
         }
         setTimeout(() => {
             adaptWordLength(targetWord.length);
-        }, 10);
+        }, 50);
     }
 
     function createLetterCell(letter, status) {
@@ -962,7 +973,7 @@
         
         setTimeout(() => {
             adaptWordLength(targetWord.length);
-        }, 100);
+        }, 150);
         
         window.addEventListener('beforeunload', () => {
             saveProgress();
