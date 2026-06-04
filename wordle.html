@@ -119,7 +119,7 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 20px;
-            overflow-x: visible;
+            overflow-x: auto;
             overflow-y: visible;
             padding-bottom: 5px;
         }
@@ -139,8 +139,7 @@
             font-weight: bold;
             text-transform: uppercase;
             flex-shrink: 0;
-            min-width: 14px;
-            min-height: 14px;
+            transition: none;
         }
 
         .letter-cell.correct {
@@ -534,7 +533,15 @@
     let gameOver = false;
     let levelComplete = false;
     let keyboardState = {};
-    let isSizeApplied = false; // Флаг, чтобы применить размер только один раз
+    
+    // Глобальные стили для ячеек (устанавливаются один раз при загрузке уровня)
+    let cellStyles = {
+        size: "38px",
+        gap: "6px",
+        fontSize: "16px",
+        borderRadius: "6px",
+        borderWidth: "2px"
+    };
 
     const gameBoard = document.getElementById('gameBoard');
     const keyboardDiv = document.getElementById('keyboard');
@@ -552,22 +559,17 @@
         ["DELETE", "ENTER"]
     ];
 
-    // ===== ФИКСИРОВАННАЯ АДАПТАЦИЯ РАЗМЕРА (один раз за уровень) =====
-    function applyFixedSize(wordLen) {
-        const gameBoardEl = document.getElementById('gameBoard');
-        if (!gameBoardEl) return;
-        
-        const containerWidth = gameBoardEl.clientWidth;
-        
+    // ===== ВЫЧИСЛЕНИЕ СТИЛЕЙ ДЛЯ ЯЧЕЕК (один раз за уровень) =====
+    function calculateCellStyles(wordLen, containerWidth) {
         let gap = 8;
         if (wordLen >= 10) gap = 5;
         if (wordLen >= 12) gap = 4;
         if (wordLen >= 14) gap = 3;
         if (wordLen >= 16) gap = 2;
         
-        let left = 14;
+        let left = 18;
         let right = 50;
-        let bestSize = 14;
+        let bestSize = 18;
         
         while (left <= right) {
             const mid = Math.floor((left + right) / 2);
@@ -581,29 +583,43 @@
             }
         }
         
-        const cellSize = Math.max(14, bestSize);
+        const cellSize = Math.max(18, bestSize);
         
-        // Сохраняем стили в CSS переменные
-        document.documentElement.style.setProperty('--cell-size', cellSize + 'px');
-        document.documentElement.style.setProperty('--cell-gap', gap + 'px');
-        document.documentElement.style.setProperty('--cell-font', Math.floor(cellSize * 0.4) + 'px');
-        document.documentElement.style.setProperty('--cell-radius', Math.floor(cellSize * 0.12) + 'px');
-        document.documentElement.style.setProperty('--cell-border', Math.max(1, Math.floor(cellSize * 0.05)) + 'px');
+        return {
+            size: cellSize + "px",
+            gap: gap + "px",
+            fontSize: Math.floor(cellSize * 0.45) + "px",
+            borderRadius: Math.floor(cellSize * 0.12) + "px",
+            borderWidth: Math.max(1, Math.floor(cellSize * 0.06)) + "px"
+        };
     }
 
-    function applyStylesToBoard() {
+    // ===== ПРИМЕНЕНИЕ СТИЛЕЙ КО ВСЕМ ЯЧЕЙКАМ =====
+    function applyStylesToAllCells() {
         const allRows = document.querySelectorAll('.word-row');
         allRows.forEach(row => {
-            row.style.gap = getComputedStyle(document.documentElement).getPropertyValue('--cell-gap');
+            row.style.gap = cellStyles.gap;
             const cells = row.querySelectorAll('.letter-cell');
             cells.forEach(cell => {
-                cell.style.width = getComputedStyle(document.documentElement).getPropertyValue('--cell-size');
-                cell.style.height = getComputedStyle(document.documentElement).getPropertyValue('--cell-size');
-                cell.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--cell-font');
-                cell.style.borderRadius = getComputedStyle(document.documentElement).getPropertyValue('--cell-radius');
-                cell.style.borderWidth = getComputedStyle(document.documentElement).getPropertyValue('--cell-border');
+                cell.style.width = cellStyles.size;
+                cell.style.height = cellStyles.size;
+                cell.style.fontSize = cellStyles.fontSize;
+                cell.style.borderRadius = cellStyles.borderRadius;
+                cell.style.borderWidth = cellStyles.borderWidth;
             });
         });
+    }
+
+    // ===== ОБНОВЛЕНИЕ СТИЛЕЙ ПРИ НОВОМ УРОВНЕ =====
+    function updateStylesForNewLevel() {
+        const gameBoardEl = document.getElementById('gameBoard');
+        if (gameBoardEl) {
+            const containerWidth = gameBoardEl.clientWidth;
+            cellStyles = calculateCellStyles(targetWord.length, containerWidth);
+        } else {
+            cellStyles = calculateCellStyles(targetWord.length, 500);
+        }
+        applyStylesToAllCells();
     }
 
     // ===== СОХРАНЕНИЕ ПРОГРЕССА =====
@@ -692,11 +708,10 @@
         renderBoard();
         renderKeyboard();
         
-        // Применяем фиксированный размер для этого уровня
+        // Обновляем стили для нового уровня
         setTimeout(() => {
-            applyFixedSize(targetWord.length);
-            applyStylesToBoard();
-        }, 50);
+            updateStylesForNewLevel();
+        }, 30);
         
         saveProgress();
     }
@@ -752,10 +767,10 @@
             }
             gameBoard.appendChild(row);
         }
-        // Применяем сохранённые стили к новым ячейкам
+        // Применяем сохранённые стили к новым ячейкам (без пересчёта!)
         setTimeout(() => {
-            applyStylesToBoard();
-        }, 10);
+            applyStylesToAllCells();
+        }, 5);
     }
 
     function createLetterCell(letter, status) {
@@ -975,17 +990,16 @@
         renderBoard();
         renderKeyboard();
         
-        // Применяем фиксированный размер
+        // Обновляем стили при загрузке
         setTimeout(() => {
-            applyFixedSize(targetWord.length);
-            applyStylesToBoard();
-        }, 150);
+            updateStylesForNewLevel();
+        }, 100);
         
         window.addEventListener('keydown', handlePhysicalKeyboard);
         window.addEventListener('resize', () => {
             setTimeout(() => {
-                applyFixedSize(targetWord.length);
-                applyStylesToBoard();
+                updateStylesForNewLevel();
+                applyStylesToAllCells();
             }, 100);
         });
         
