@@ -128,7 +128,6 @@
             display: flex;
             justify-content: center;
             flex-wrap: nowrap;
-            transition: gap 0.1s ease;
         }
 
         .letter-cell {
@@ -140,7 +139,6 @@
             font-weight: bold;
             text-transform: uppercase;
             flex-shrink: 0;
-            transition: all 0.05s ease;
             min-width: 14px;
             min-height: 14px;
         }
@@ -536,7 +534,7 @@
     let gameOver = false;
     let levelComplete = false;
     let keyboardState = {};
-    let currentWordLength = 0;
+    let isSizeApplied = false; // Флаг, чтобы применить размер только один раз
 
     const gameBoard = document.getElementById('gameBoard');
     const keyboardDiv = document.getElementById('keyboard');
@@ -554,12 +552,8 @@
         ["DELETE", "ENTER"]
     ];
 
-    // ===== ДИНАМИЧЕСКАЯ АДАПТАЦИЯ РАЗМЕРА ЯЧЕЕК =====
-    function adaptWordLength(wordLen, force = false) {
-        if (currentWordLength === wordLen && !force) return;
-        
-        currentWordLength = wordLen;
-        
+    // ===== ФИКСИРОВАННАЯ АДАПТАЦИЯ РАЗМЕРА (один раз за уровень) =====
+    function applyFixedSize(wordLen) {
         const gameBoardEl = document.getElementById('gameBoard');
         if (!gameBoardEl) return;
         
@@ -589,16 +583,25 @@
         
         const cellSize = Math.max(14, bestSize);
         
+        // Сохраняем стили в CSS переменные
+        document.documentElement.style.setProperty('--cell-size', cellSize + 'px');
+        document.documentElement.style.setProperty('--cell-gap', gap + 'px');
+        document.documentElement.style.setProperty('--cell-font', Math.floor(cellSize * 0.4) + 'px');
+        document.documentElement.style.setProperty('--cell-radius', Math.floor(cellSize * 0.12) + 'px');
+        document.documentElement.style.setProperty('--cell-border', Math.max(1, Math.floor(cellSize * 0.05)) + 'px');
+    }
+
+    function applyStylesToBoard() {
         const allRows = document.querySelectorAll('.word-row');
         allRows.forEach(row => {
-            row.style.gap = `${gap}px`;
+            row.style.gap = getComputedStyle(document.documentElement).getPropertyValue('--cell-gap');
             const cells = row.querySelectorAll('.letter-cell');
             cells.forEach(cell => {
-                cell.style.width = `${cellSize}px`;
-                cell.style.height = `${cellSize}px`;
-                cell.style.fontSize = `${Math.floor(cellSize * 0.4)}px`;
-                cell.style.borderRadius = `${Math.floor(cellSize * 0.12)}px`;
-                cell.style.borderWidth = `${Math.max(1, Math.floor(cellSize * 0.05))}px`;
+                cell.style.width = getComputedStyle(document.documentElement).getPropertyValue('--cell-size');
+                cell.style.height = getComputedStyle(document.documentElement).getPropertyValue('--cell-size');
+                cell.style.fontSize = getComputedStyle(document.documentElement).getPropertyValue('--cell-font');
+                cell.style.borderRadius = getComputedStyle(document.documentElement).getPropertyValue('--cell-radius');
+                cell.style.borderWidth = getComputedStyle(document.documentElement).getPropertyValue('--cell-border');
             });
         });
     }
@@ -689,8 +692,10 @@
         renderBoard();
         renderKeyboard();
         
+        // Применяем фиксированный размер для этого уровня
         setTimeout(() => {
-            adaptWordLength(targetWord.length, true);
+            applyFixedSize(targetWord.length);
+            applyStylesToBoard();
         }, 50);
         
         saveProgress();
@@ -747,6 +752,10 @@
             }
             gameBoard.appendChild(row);
         }
+        // Применяем сохранённые стили к новым ячейкам
+        setTimeout(() => {
+            applyStylesToBoard();
+        }, 10);
     }
 
     function createLetterCell(letter, status) {
@@ -923,7 +932,7 @@
             const oldReset = document.querySelector('.reset-btn');
             if (oldReset) oldReset.remove();
         };
-        const oldBtn = document.querySelector('next-level-btn');
+        const oldBtn = document.querySelector('.next-level-btn');
         if (oldBtn) oldBtn.remove();
         const oldReset = document.querySelector('.reset-btn');
         if (oldReset) oldReset.remove();
@@ -966,14 +975,17 @@
         renderBoard();
         renderKeyboard();
         
+        // Применяем фиксированный размер
         setTimeout(() => {
-            adaptWordLength(targetWord.length, true);
+            applyFixedSize(targetWord.length);
+            applyStylesToBoard();
         }, 150);
         
         window.addEventListener('keydown', handlePhysicalKeyboard);
         window.addEventListener('resize', () => {
             setTimeout(() => {
-                adaptWordLength(targetWord.length, true);
+                applyFixedSize(targetWord.length);
+                applyStylesToBoard();
             }, 100);
         });
         
