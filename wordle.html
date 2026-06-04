@@ -119,7 +119,7 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 20px;
-            overflow-x: auto;
+            overflow-x: visible;
             overflow-y: visible;
             padding-bottom: 5px;
         }
@@ -551,19 +551,37 @@
         ["DELETE", "ENTER"]
     ];
 
-    // ===== ДИНАМИЧЕСКАЯ АДАПТАЦИЯ РАЗМЕРА ЯЧЕЕК =====
+    // ===== ДИНАМИЧЕСКАЯ АДАПТАЦИЯ РАЗМЕРА ЯЧЕЕК (без скролла) =====
     function adaptWordLength(wordLen) {
-        const rows = document.querySelectorAll('.word-row');
         const gameBoardEl = document.getElementById('gameBoard');
-        if (!gameBoardEl || rows.length === 0) return;
-
+        if (!gameBoardEl) return;
+        
+        const firstRow = document.querySelector('.word-row');
+        if (!firstRow) return;
+        
         const containerWidth = gameBoardEl.clientWidth;
         const gap = 8;
-        const totalGap = gap * (wordLen - 1);
-        let cellSize = Math.floor((containerWidth - totalGap) / wordLen);
-        cellSize = Math.min(50, Math.max(22, cellSize));
-
-        rows.forEach(row => {
+        
+        let left = 20;
+        let right = 50;
+        let bestSize = 20;
+        
+        while (left <= right) {
+            const mid = Math.floor((left + right) / 2);
+            const totalWidth = (mid * wordLen) + (gap * (wordLen - 1));
+            
+            if (totalWidth <= containerWidth) {
+                bestSize = mid;
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        const cellSize = bestSize;
+        
+        const allRows = document.querySelectorAll('.word-row');
+        allRows.forEach(row => {
             const cells = row.querySelectorAll('.letter-cell');
             cells.forEach(cell => {
                 cell.style.width = `${cellSize}px`;
@@ -934,10 +952,18 @@
         }
         renderBoard();
         renderKeyboard();
+        
         window.addEventListener('keydown', handlePhysicalKeyboard);
         window.addEventListener('resize', () => {
-            adaptWordLength(targetWord.length);
+            setTimeout(() => {
+                adaptWordLength(targetWord.length);
+            }, 100);
         });
+        
+        setTimeout(() => {
+            adaptWordLength(targetWord.length);
+        }, 100);
+        
         window.addEventListener('beforeunload', () => {
             saveProgress();
         });
