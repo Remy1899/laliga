@@ -22,7 +22,7 @@
         }
 
         .container {
-            max-width: 550px;
+            max-width: 650px;
             width: 100%;
             background: rgba(255,255,255,0.95);
             border-radius: 16px;
@@ -117,12 +117,14 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 20px;
+            overflow-x: auto;
         }
 
         .word-row {
             display: flex;
             gap: 8px;
             justify-content: center;
+            flex-wrap: nowrap;
         }
 
         .letter-cell {
@@ -137,6 +139,7 @@
             font-size: 1.6rem;
             font-weight: bold;
             text-transform: uppercase;
+            flex-shrink: 0;
         }
 
         .letter-cell.correct {
@@ -155,6 +158,48 @@
             background: #6c757d;
             border-color: #5a6268;
             color: white;
+        }
+
+        /* Адаптация для длинных слов */
+        @media (max-width: 600px) {
+            .letter-cell {
+                width: 42px;
+                height: 42px;
+                font-size: 1.3rem;
+            }
+            .word-row.long-word .letter-cell {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+            .word-row.very-long-word .letter-cell {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .letter-cell {
+                width: 38px;
+                height: 38px;
+                font-size: 1.1rem;
+            }
+            .word-row.long-word .letter-cell {
+                width: 30px;
+                height: 30px;
+                font-size: 0.85rem;
+            }
+            .word-row.very-long-word .letter-cell {
+                width: 24px;
+                height: 24px;
+                font-size: 0.65rem;
+            }
+            .key {
+                padding: 8px 6px;
+                min-width: 32px;
+                font-size: 0.75rem;
+            }
         }
 
         .keyboard {
@@ -284,19 +329,6 @@
             font-size: 0.7rem;
             margin-top: 20px;
             color: #000000;
-        }
-
-        @media (max-width: 500px) {
-            .letter-cell {
-                width: 42px;
-                height: 42px;
-                font-size: 1.3rem;
-            }
-            .key {
-                padding: 8px 6px;
-                min-width: 32px;
-                font-size: 0.75rem;
-            }
         }
     </style>
 </head>
@@ -454,6 +486,19 @@
         ["Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х", "Ъ", "Ф", "Ы", "В", "А", "П", "Р", "О", "Л", "Д", "Ж", "Э", "Я", "Ч", "С", "М", "И", "Т", "Ь", "Б", "Ю"],
         ["DELETE", "ENTER"]
     ];
+
+    // Функция для адаптации размера ячеек под длину слова
+    function adaptWordLength(wordLen) {
+        const rows = document.querySelectorAll('.word-row');
+        rows.forEach(row => {
+            row.classList.remove('long-word', 'very-long-word');
+            if (wordLen >= 9 && wordLen <= 11) {
+                row.classList.add('long-word');
+            } else if (wordLen >= 12) {
+                row.classList.add('very-long-word');
+            }
+        });
+    }
 
     // ===== СОХРАНЕНИЕ ПРОГРЕССА =====
     function saveProgress() {
@@ -617,6 +662,9 @@
             
             gameBoard.appendChild(row);
         }
+        
+        // Адаптируем размер ячеек под длину слова
+        adaptWordLength(targetWord.length);
     }
 
     function createLetterCell(letter, status) {
