@@ -228,10 +228,11 @@
             align-items: center;
             justify-content: center;
         }
-
-        .badge-legendary { background: #FFD700; color: #1B3B6F; }
+        
+        .badge-legendary { background: #FFFFFF; color: #FFD700; }
         .badge-epic { background: #9b59b6; color: white; }
         .badge-rare { background: #3498db; color: white; }
+	    .badge-common { background: #ff4a42; color: white; }
 
         /* Модальное окно */
         .modal {
@@ -312,10 +313,12 @@
         <button class="filter-btn active" data-filter="all">Все</button>
         <button class="filter-btn" data-filter="legendary">🌟 Легендарные</button>
         <button class="filter-btn" data-filter="epic">💎 Эпические</button>
-        <button class="filter-btn" data-filter="rare">📘 Обычные</button>
+        <button class="filter-btn" data-filter="rare">📘 Редкие</button>
+        <button class="filter-btn" data-filter="common">🟤 Обычные</button>
         <button class="filter-btn" data-filter="owned">✅ Собраны</button>
         <button class="filter-btn" data-filter="missing">❌ Отсутствуют</button>
     </div>
+
 
     <div class="collection-grid" id="collectionGrid"></div>
 
@@ -639,31 +642,31 @@
         { id: 302, name: "Карл Эта Эйонг", team: "Леванте", image: "Levante.png", rating: 75, rarity: "common" },
         { id: 303, name: "Иван Ромеро", team: "Леванте", image: "Levante.png", rating: 72, rarity: "common" },
         { id: 304, name: "Хосе Луис Моралес", team: "Леванте", image: "Levante.png", rating: 74, rarity: "common" },
-        { id: 305, name: "Аугусто Баталья", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 79, rarity: "common" },
-        { id: 306, name: "Дани Карденас", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 75, rarity: "common" },
-        { id: 307, name: "Нобель Менди", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 67, rarity: "common" },
-        { id: 308, name: "Абдул Мумин", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 78, rarity: "common" },
-        { id: 309, name: "Луиз Фелипе", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 75, rarity: "common" },
-        { id: 310, name: "Флориан Лежён", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 80, rarity: "common" },
-        { id: 311, name: "Пеп Чевария", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 77, rarity: "common" },
-        { id: 312, name: "Альфонсо Эспино", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 74, rarity: "common" },
-        { id: 313, name: "Андрей Ратиу", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 80, rarity: "common" },
-        { id: 314, name: "Жерар Гумбау", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 73, rarity: "common" },
-        { id: 315, name: "Иван Балиу", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 76, rarity: "common" },
-        { id: 316, name: "Педро Диас", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 75, rarity: "common" },
-        { id: 317, name: "Унай Лопес", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 76, rarity: "common" },
-        { id: 318, name: "Оскар Валентин", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 78, rarity: "common" },
-        { id: 319, name: "Пате Сис", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 79, rarity: "common" },
-        { id: 320, name: "Ранди Нтека", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 70, rarity: "common" },
-        { id: 321, name: "Оскар Трехо", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 71, rarity: "common" },
-        { id: 322, name: "Карлос Мартин", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 70, rarity: "common" },
-        { id: 323, name: "Альваро Гарсия", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 80, rarity: "common" },
-        { id: 324, name: "Ильяс Ахомаш", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 76, rarity: "common" },
-        { id: 325, name: "Хорхе де Фрутос", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 78, rarity: "common" },
-        { id: 326, name: "Фран Перез", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 72, rarity: "common" },
-        { id: 327, name: "Иси Палазон", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 82, rarity: "common" },
-        { id: 328, name: "Алемао", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 74, rarity: "common" },
-        { id: 329, name: "Серхио Камелльо", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 74, rarity: "common" },
+        { id: 305, name: "Аугусто Баталья", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 79, rarity: "common" },
+        { id: 306, name: "Дани Карденас", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 75, rarity: "common" },
+        { id: 307, name: "Нобель Менди", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 67, rarity: "common" },
+        { id: 308, name: "Абдул Мумин", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 78, rarity: "common" },
+        { id: 309, name: "Луиз Фелипе", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 75, rarity: "common" },
+        { id: 310, name: "Флориан Лежён", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 80, rarity: "common" },
+        { id: 311, name: "Пеп Чевария", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 77, rarity: "common" },
+        { id: 312, name: "Альфонсо Эспино", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 74, rarity: "common" },
+        { id: 313, name: "Андрей Ратиу", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 80, rarity: "common" },
+        { id: 314, name: "Жерар Гумбау", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 73, rarity: "common" },
+        { id: 315, name: "Иван Балиу", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 76, rarity: "common" },
+        { id: 316, name: "Педро Диас", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 75, rarity: "common" },
+        { id: 317, name: "Унай Лопес", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 76, rarity: "common" },
+        { id: 318, name: "Оскар Валентин", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 78, rarity: "common" },
+        { id: 319, name: "Пате Сис", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 79, rarity: "common" },
+        { id: 320, name: "Ранди Нтека", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 70, rarity: "common" },
+        { id: 321, name: "Оскар Трехо", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 71, rarity: "common" },
+        { id: 322, name: "Карлос Мартин", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 70, rarity: "common" },
+        { id: 323, name: "Альваро Гарсия", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 80, rarity: "common" },
+        { id: 324, name: "Ильяс Ахомаш", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 76, rarity: "common" },
+        { id: 325, name: "Хорхе де Фрутос", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 78, rarity: "common" },
+        { id: 326, name: "Фран Перез", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 72, rarity: "common" },
+        { id: 327, name: "Иси Палазон", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 82, rarity: "common" },
+        { id: 328, name: "Алемао", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 74, rarity: "common" },
+        { id: 329, name: "Серхио Камелльо", team: "Райо Вальекано", image: "Rayo_Vallecano.png", rating: 74, rarity: "common" },
         { id: 330, name: "Серхио Эррера", team: "Осасуна", image: "osasuna.png", rating: 79, rarity: "common" },
         { id: 331, name: "Энцо Бойомо", team: "Осасуна", image: "osasuna.png", rating: 78, rarity: "common" },
         { id: 332, name: "Хорхе Эрнандо", team: "Осасуна", image: "osasuna.png", rating: 74, rarity: "common" },
@@ -807,6 +810,9 @@
             case "rare":
                 filtered = filtered.filter(p => p.rarity === "rare");
                 break;
+            case "common":
+                filtered = filtered.filter(p => p.rarity === "common");
+                break;
             case "owned":
                 filtered = filtered.filter(p => ownedCards[p.id]);
                 break;
@@ -824,6 +830,8 @@
         switch(rarity) {
             case 'legendary': return 'badge-legendary';
             case 'epic': return 'badge-epic';
+            case 'rare': return 'badge-rare';
+            case 'common': return 'badge-common';
             default: return 'badge-rare';
         }
     }
@@ -844,7 +852,7 @@
             
             card.innerHTML = `
                 <div class="badge-mini ${badgeClass}">${player.rarity === 'legendary' ? '⭐' : (player.rarity === 'epic' ? '💎' : '📘')}</div>
-                <div class="card-img">${player.emoji}</div>
+                <div class="card-img">${player.image ? `<img src="${player.image}" style="width:60px; height:60px; border-radius:50%; object-fit:cover;">` : player.emoji}</div>
                 <div class="card-name">${player.name}</div>
                 <div class="card-rating">⭐ ${player.rating}</div>
                 <div class="card-duplicates">${duplicateCount > 0 ? `📦 x${duplicateCount}` : ''}</div>
@@ -862,7 +870,7 @@
         const rarityText = player.rarity === 'legendary' ? 'Легендарная' : (player.rarity === 'epic' ? 'Эпическая' : 'Обычная');
         
         modalContent.innerHTML = `
-            <div style="font-size: 4rem;">${player.emoji}</div>
+            ${player.image ? `<img src="${player.image}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">` : `<div style="font-size: 4rem;">${player.emoji}</div>`}
             <h2>${player.name}</h2>
             <p>⚽ ${player.team}</p>
             <p>⭐ Рейтинг: ${player.rating}</p>
