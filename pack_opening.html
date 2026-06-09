@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Открытие пака - Ла Лига</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff4b44 0%, #ffffff 50%, #d9403a 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255,215,0,0.1) 0%, transparent 80%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border: 2px solid #FFD700;
+            text-align: center;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 8px;
+            padding: 5px 12px;
+            border: 2px solid #FFD700;
+        }
+
+        .logo-img {
+            max-height: 45px;
+            width: auto;
+            display: block;
+        }
+
+        .home-btn, .collection-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #6c5ce7 0%, #5a4ace 100%);
+            color: white;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            border: 1px solid #FFD700;
+            cursor: pointer;
+        }
+
+        .collection-btn {
+            background: linear-gradient(135deg, #2a9d8f 0%, #1e6b60 100%);
+        }
+
+        .home-btn:hover, .collection-btn:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #000000 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+        }
+
+        .sub {
+            color: #ff4b44;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Статистика */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 16px;
+        }
+
+        .stat {
+            font-weight: bold;
+            color: #1B3B6F;
+        }
+
+        /* Упаковка */
+        .pack-container {
+            perspective: 1000px;
+            margin: 30px 0;
+            cursor: pointer;
+        }
+
+        .pack {
+            width: 200px;
+            height: 280px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+            cursor: pointer;
+        }
+
+        .pack-front, .pack-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .pack-front {
+            background: linear-gradient(135deg, #ff4b44, #d9403a);
+            border: 3px solid #FFD700;
+            transform: rotateY(0deg);
+        }
+
+        .pack-back {
+            background: linear-gradient(135deg, #1B3B6F, #0F2A4A);
+            border: 3px solid #FFD700;
+            transform: rotateY(180deg);
+            font-size: 1rem;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .pack.open {
+            transform: rotateY(180deg);
+        }
+
+        .pack-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .pack-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .pack-subtitle {
+            font-size: 0.8rem;
+            color: #FFD700;
+            margin-top: 10px;
+        }
+
+        /* Анимация карточки */
+        .card-reveal {
+            margin-top: 20px;
+            animation: slideUp 0.5s ease forwards;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-display {
+            background: linear-gradient(135deg, #1B3B6F, #0F2A4A);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #FFD700;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card-emoji {
+            font-size: 4rem;
+            background: white;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .card-info {
+            text-align: left;
+            color: white;
+        }
+
+        .card-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card-team {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .card-rating {
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .badge-legendary { background: #FFFFFF; color: #FFD700; }
+        .badge-epic { background: #9b59b6; color: white; }
+        .badge-rare { background: #3498db; color: white; }
+	.badge-common { background: #ff4a42; color: white; }
+
+        .duplicate-info {
+            color: #ff4b44;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .new-info {
+            color: #2a9d8f;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .button-group {
+            margin-top: 20px;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #1B2F4F;
+            transition: 0.2s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 20px;
+            color: #1B3B6F;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .open-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #1B2F4F;
+            margin-top: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <div class="logo-container">
+            <img src="laliga.png" alt="La Liga Logo" class="logo-img" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="collection-btn" onclick="window.location.href='collection.html'">📦 Коллекция</button>
+            <a href="index.html" class="home-btn">🏠 На главную</a>
+        </div>
+    </div>
+
+    <h1>🎁 ОТКРЫТИЕ ПАКА 🎁</h1>
+    <div class="sub">Нажми на пак, чтобы открыть</div>
+
+    <div class="stats">
+        <div class="stat">⭐ ДОСТУПНО: <span id="packsAvailable">1</span></div>
+        <div class="stat">🕐 СЛЕДУЮЩИЙ: <span id="nextPackTime">--:--:--</span></div>
+    </div>
+
+    <div class="pack-container" id="packContainer">
+        <div class="pack" id="pack">
+            <div class="pack-front">
+                <div class="pack-icon">🎁</div>
+                <div class="pack-title">LA LIGA PACK</div>
+                <div class="pack-subtitle">Нажми, чтобы открыть</div>
+            </div>
+            <div class="pack-back">
+                <div class="pack-icon">⚡</div>
+                <div class="pack-title">ОДИН ПАК В ДЕНЬ</div>
+                <div class="pack-subtitle">Собери всех звёзд!</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="button-group">
+        <button class="open-btn" id="openBtn">🎁 ОТКРЫТЬ ПАК 🎁</button>
+    </div>
+
+    <div id="resultArea" style="display: none;">
+        <div class="card-reveal" id="cardReveal"></div>
+        <button class="next-btn" id="nextBtn">🔄 ЗАКРЫТЬ</button>
+    </div>
+
+    <footer>
+        🏆 Один пак в день | Разные редкости | Собирай коллекцию
+    </footer>
+</div>
+
+<script>
+    // ===== СПИСОК ФУТБОЛИСТОВ с рейтингами и редкостями =====
+    const PLAYERS = [
+        // Легендарные (рейтинг 90+)
+        { id: 1, name: "Лионель Месси", team: "Барселона", emoji: "🐐", rating: 99, rarity: "legendary", probability: 0.01 },
+        { id: 2, name: "Криштиану Роналду", team: "Реал Мадрид", emoji: "🐐", rating: 98, rarity: "legendary", probability: 0.01 },
+        { id: 3, name: "Лука Модрич", team: "Реал Мадрид", emoji: "🐐", rating: 96, rarity: "legendary", probability: 0.02 },
+        { id: 4, name: "Карим Бензема", team: "Реал Мадрид", emoji: "🐐", rating: 96, rarity: "legendary", probability: 0.02 },
+        { id: 5, name: "Роберт Левандовски", team: "Барселона", emoji: "🐐", rating: 96, rarity: "legendary", probability: 0.02 },
+        { id: 6, name: "Икер Касильяс", team: "Реал Мадрид", emoji: "🐐", rating: 94, rarity: "legendary", probability: 0.02 },
+        { id: 7, name: "Серхио Рамос", team: "Реал Мадрид", emoji: "🐐", rating: 94, rarity: "legendary", probability: 0.02 },
+	{ id: 8, name: "Андрес Иньеста", team: "Барселона", emoji: "🐐", rating: 95, rarity: "legendary", probability: 0.02 },
+	{ id: 9, name: "Луис Суарес", team: "Атлетико/Барса", emoji: "🐐", rating: 94, rarity: "legendary", probability: 0.02 },
+        { id: 10, name: "Антуан Гризманн", team: "Атлетико", emoji: "🐐", rating: 93, rarity: "legendary", probability: 0.02 },
+	{ id: 11, name: "Роналдо", team: "Барселона/Реал", emoji: "🐐", rating: 95, rarity: "legendary", probability: 0.02 },
+        { id: 12, name: "Зинедин Зидан", team: "Реал Мадрид", emoji: "🐐", rating: 95, rarity: "legendary", probability: 0.02 },
+	{ id: 13, name: "Хави Эрнандес", team: "Барселона", emoji: "🐐", rating: 96, rarity: "legendary", probability: 0.02 },
+	{ id: 14, name: "Карлес Пуйоль", team: "Барселона", emoji: "🐐", rating: 95, rarity: "legendary", probability: 0.02 }
+
+        // Эпические
+	{ id: 15, name: "Педри", team: "Барселона", image: "Barcelona.png", rating: 91, rarity: "epic", probability: 0.03 },
+        { id: 16, name: "Рафинья", team: "Барселона", image: "Barcelona.png", rating: 91, rarity: "epic", probability: 0.03 },
+        { id: 17, name: "Ламин Ямаль", team: "Барселона", image: "Barcelona.png", rating: 91, rarity: "epic", probability: 0.03 },
+ 	{ id: 18, name: "Киллиан Мбаппе", team: "Реал Мадрид", image: "real_madrid.png", rating: 91, rarity: "epic", probability: 0.03 },       
+        { id: 19, name: "Винисиус Дж.", team: "Реал Мадрид", image: "real_madrid.png", rating: 90, rarity: "epic", probability: 0.03 },
+        { id: 20, name: "Хулиан Альварес", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 90, rarity: "epic", probability: 0.03 },
+        { id: 21, name: "Джуд Беллингем", team: "Реал Мадрид", image: "real_madrid.png", rating: 90, rarity: "epic", probability: 0.03 },
+        { id: 22, name: "Фермин Лопес", team: "Барселона", image: "Barcelona.png", rating: 90, rarity: "epic", probability: 0.03 },
+ 	{ id: 23, name: "Арда Гюлер", team: "Реал Мадрид", image: "real_madrid.png", rating: 90, rarity: "epic", probability: 0.03 },
+        { id: 24, name: "Пау Кубарси", team: "Барселона", image: "Barcelona.png", rating: 90, rarity: "epic", probability: 0.03 },
+	{ id: 25, name: "Феде Вальверде", team: "Реал Мадрид", image: "real_madrid.png", rating: 90, rarity: "epic", probability: 0.03 },
+        
+        // Редкие
+        { id: 26, name: "Коке", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 86, rarity: "rare", probability: 0.07 },
+        { id: 27, name: "Гави", team: "Барселона", image: "Barcelona.png", rating: 86, rarity: "rare", probability: 0.07 },
+        { id: 28, name: "Ферран Торрес", team: "Барселона", image: "Barcelona.png", rating: 88, rarity: "rare", probability: 0.07 },
+	{ id: 29, name: "Орельян Чуамени", team: "Реал Мадрид", image: "real_madrid.png", rating: 88, rarity: "rare", probability: 0.07 },
+	{ id: 30, name: "Трент", team: "Реал Мадрид", image: "real_madrid.png", rating: 88, rarity: "rare", probability: 0.07 },
+	{ id: 31, name: "Дани Ольмо", team: "Барселона", image: "Barcelona.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 32, name: "Жуль Кунде", team: "Барселона", image: "Barcelona.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 33, name: "Дин Хейсен", team: "Реал Мадрид", image: "real_madrid.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 34, name: "Пабло Барриос", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 86, rarity: "rare", probability: 0.07 },
+	{ id: 35, name: "Альберто Молейро", team: "Вильярреал", image: "Villarreal.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 36, name: "Алехандро Бальде", team: "Барселона", image: "Barcelona.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 37, name: "Эдуардо Камавинга", team: "Реал Мадрид", image: "real_madrid.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 38, name: "Альваро Каррерас", team: "Реал Мадрид", image: "real_madrid.png", rating: 86, rarity: "rare", probability: 0.07 },
+	{ id: 39, name: "Жоан Гарсия", team: "Барселона", image: "Barcelona.png", rating: 88, rarity: "rare", probability: 0.07 },
+	{ id: 40, name: "Родриго", team: "Реал Мадрид", image: "real_madrid.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 41, name: "Адемола Лукман", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 86, rarity: "rare", probability: 0.07 },
+	{ id: 42, name: "Алекс Баена", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 86, rarity: "rare", probability: 0.07 },
+	{ id: 43, name: "Джулиано Симеоне", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 44, name: "Эрик Гарсия", team: "Барселона", image: "Barcelona.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 45, name: "Пап Гийе", team: "Вилльярреал", image: "Villarreal.png", rating: 86, rarity: "rare", probability: 0.07 },
+	{ id: 46, name: "Антони", team: "Реал Бетис", image: "Real_Betis.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 47, name: "Абде Эззальзули", team: "Реал Бетис", image: "Real_Betis.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 48, name: "Нико Уильямс", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 49, name: "Давид Ганцко", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 86, rarity: "rare", probability: 0.07 },
+	{ id: 50, name: "Френки Де Йонг", team: "Барселона", image: "Barcelona.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 51, name: "Марк Пубиль", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 52, name: "Браим Диас", team: "Реал Мадрид", image: "real_madrid.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 53, name: "Жерар Мартин", team: "Барселона", image: "Barcelona.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 54, name: "Ян Облак", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 55, name: "Тибо Куртуа", team: "Реал Мадрид", image: "real_madrid.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 56, name: "Микель Аурегизар", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 85, rarity: "rare", probability: 0.07 },
+	{ id: 57, name: "Маркос Льоренте", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 87, rarity: "rare", probability: 0.07 },
+	{ id: 58, name: "Микель Оярсабаль", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 87, rarity: "rare", probability: 0.07 },
+
+	// Обычные
+	{ id: 59, name: "Войцех Шченсны", team: "Барселона", image: "Barcelona.png", rating: 81, rarity: "common", probability: 0.09 },
+	{ id: 60, name: "Рональд Араухо", team: "Барселона", image: "Barcelona.png", rating: 83, rarity: "common", probability: 0.09 },
+	{ id: 61, name: "Андреас Кристенсен", team: "Барселона", image: "Barcelona.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 62, name: "Марк Берналь", team: "Барселона", image: "Barcelona.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 63, name: "Марк Касадо", team: "Барселона", image: "Barcelona.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 64, name: "Руни Бардагжи", team: "Барселона", image: "Barcelona.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 65, name: "Андрей Лунин", team: "Реал Мадрид", image: "real_madrid.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 66, name: "Эдер Милитао", team: "Реал Мадрид", image: "real_madrid.png", rating: 83, rarity: "common", probability: 0.09 },
+	{ id: 67, name: "Рауль Асенсио", team: "Реал Мадрид", image: "real_madrid.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 68, name: "Антонио Рюдигер", team: "Реал Мадрид", image: "real_madrid.png", rating: 84, rarity: "common", probability: 0.09 },
+	{ id: 69, name: "Фран Гарсия", team: "Реал Мадрид", image: "real_madrid.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 70, name: "Ферлан Менди", team: "Реал Мадрид", image: "real_madrid.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 71, name: "Дани Себальос", team: "Реал Мадрид", image: "real_madrid.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 72, name: "Франко Мастантуоно", team: "Реал Мадрид", image: "real_madrid.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 73, name: "Гонсало Гарсия", team: "Реал Мадрид", image: "real_madrid.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 74, name: "Хуан Муссо", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 75, name: "Робин Ле Норман", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 76, name: "Хосе Мария Хименес", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 77, name: "Клеман Лангле", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 78, name: "Маттео Руджери", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 79, name: "Нахуель Молина", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 80, name: "Родриго Мендоса", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 81, name: "Обед Варгас", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 70, rarity: "common", probability: 0.09 },
+	{ id: 82, name: "Тьяго Альмада", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 83, name: "Луиз Жуниор", team: "Вилльярреал", image: "Villarreal.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 84, name: "Арнау Тенас", team: "Вилльярреал", image: "Villarreal.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 85, name: "Диего Конде", team: "Вилльярреал", image: "Villarreal.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 86, name: "Ренату Вейга", team: "Вилльярреал", image: "Villarreal.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 87, name: "Логан Кошта", team: "Вилльярреал", image: "Villarreal.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 88, name: "Пау Наварро", team: "Вилльярреал", image: "Villarreal.png", rating: 72, rarity: "common", probability: 0.09 },
+	{ id: 89, name: "Рафа Марин", team: "Вилльярреал", image: "Villarreal.png", rating: 73, rarity: "common", probability: 0.09 },
+	{ id: 90, name: "Хуан Фойт", team: "Вилльярреал", image: "Villarreal.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 91, name: "Вилли Камбвала", team: "Вилльярреал", image: "Villarreal.png", rating: 72, rarity: "common", probability: 0.09 },
+	{ id: 92, name: "Серхи Кардона", team: "Вилльярреал", image: "Villarreal.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 93, name: "Альфонсо Педраза", team: "Вилльярреал", image: "Villarreal.png", rating: 74, rarity: "common", probability: 0.09 },
+	{ id: 94, name: "Сантьяго Моуринью", team: "Вилльярреал", image: "Villarreal.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 95, name: "Алекс Фриман", team: "Вилльярреал", image: "Villarreal.png", rating: 67, rarity: "common", probability: 0.09 },
+	{ id: 96, name: "Томас Парти", team: "Вилльярреал", image: "Villarreal.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 97, name: "Санти Комесанья", team: "Вилльярреал", image: "Villarreal.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 98, name: "Дани Парехо", team: "Вилльярреал", image: "Villarreal.png", rating: 81, rarity: "common", probability: 0.09 },
+	{ id: 99, name: "Альфон Гонсалес", team: "Вилльярреал", image: "Villarreal.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 100, name: "Тайон Бьюкинен", team: "Вилльярреал", image: "Villarreal.png", rating: 76, rarity: "common", probability: 0.09 },
+	{ id: 101, name: "Николя Пепе", team: "Вилльярреал", image: "Villarreal.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 102, name: "Георгес Микаутадзе", team: "Вилльярреал", image: "Villarreal.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 103, name: "Тани Олувасейи", team: "Вилльярреал", image: "Villarreal.png", rating: 73, rarity: "common", probability: 0.09 },
+	{ id: 104, name: "Айозе Перес", team: "Вилльярреал", image: "Villarreal.png", rating: 83, rarity: "common", probability: 0.09 },
+	{ id: 105, name: "Жерар Морено", team: "Вилльярреал", image: "Villarreal.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 106, name: "Алекс Ремиро", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 107, name: "Унай Марреро", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 71, rarity: "common", probability: 0.09 },
+	{ id: 108, name: "Хон Мартин", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 71, rarity: "common", probability: 0.09 },
+	{ id: 109, name: "Игор Субельдия", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 110, name: "Чалета-Цар", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 73, rarity: "common", probability: 0.09 },
+	{ id: 111, name: "Аритз Элюстондо", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 112, name: "Серхи Гомес", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 113, name: "Айен Муньос", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 114, name: "Хон Арамбуру", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 77, rarity: "common", probability: 0.09 },
+	{ id: 115, name: "Альваро Одриосола", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 73, rarity: "common", probability: 0.09 },
+	{ id: 116, name: "Хон Горотчатеги", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 117, name: "Беньят Туррьентес", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 118, name: "Лука Сучич", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 119, name: "Карлос Солер", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 120, name: "Янгель Эррера", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 81, rarity: "common", probability: 0.09 },
+	{ id: 121, name: "Арсен Захарян", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 74, rarity: "common", probability: 0.09 },
+	{ id: 122, name: "Браис Мендес", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 123, name: "Пабло Марин", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 124, name: "Андер Барренетчеа", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 125, name: "Гонсало Гедеш", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 126, name: "Уэсли", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 72, rarity: "common", probability: 0.09 },
+	{ id: 127, name: "Такефусо Кубо", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 82, rarity: "common", probability: 0.09 },
+	{ id: 128, name: "Орри Оскарсон", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 129, name: "Хон Каррикабуру", team: "Реал Сосьедад", image: "Real_Sociedad.png", rating: 68, rarity: "common", probability: 0.09 },
+	{ id: 130, name: "Альваро Вальес", team: "Реал Бетис", image: "Real_Betis.png", rating: 80, rarity: "common", probability: 0.09 },
+	{ id: 131, name: "Пау Лопес", team: "Реал Бетис", image: "Real_Betis.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 132, name: "Натан", team: "", team: "Реал Бетис", image: "Real_Betis.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 133, name: "Валентин Гомес", team: "Реал Бетис", image: "Real_Betis.png", rating: 76, rarity: "common", probability: 0.09 },
+	{ id: 134, name: "Диего Льоренте", team: "Реал Бетис", image: "Real_Betis.png", rating: 79, rarity: "common", probability: 0.09 },
+	{ id: 135, name: "Марк Бартра", team: "Реал Бетис", image: "Real_Betis.png", rating: 78, rarity: "common", probability: 0.09 },
+	{ id: 136, name: "Хуниор Фирпо", team: "Реал Бетис", image: "Real_Betis.png", rating: 75, rarity: "common", probability: 0.09 },
+	{ id: 137, name: "Рикардо Родригес", team: "Реал Бетис", image: "Real_Betis.png", rating: 73, rarity: "common", probability: 0.09 },
+	{ id: 138, name: "Анхель Ортиз", team: "Реал Бетис", image: "Real_Betis.png", rating: 69, rarity: "common", probability: 0.09 },
+	{ id: 139, name: "Эктор Бельерин", team: "Реал Бетис", image: "Real_Betis.png", rating: 73, rarity: "common", probability: 0.09 },
+	{ id: 140, name: "Софьян Амрабат", team: "Реал Бетис", image: "Real_Betis.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 141, name: "Марк Рока", team: "Реал Бетис", image: "Real_Betis.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 142, name: "Серхи Альтимира", team: "Реал Бетис", image: "Real_Betis.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 143, name: "Нельсон Деосса", team: "Реал Бетис", image: "Real_Betis.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 144, name: "Пабло Форнальс", team: "Реал Бетис", image: "Real_Betis.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 145, name: "Альваро Фидальго", team: "Реал Бетис", image: "Real_Betis.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 146, name: "Джовани Ло Чельсо", team: "Реал Бетис", image: "Real_Betis.png", rating: 82, rarity: "common", probability: 0.09 },
+        { id: 147, name: "Иско", team: "Реал Бетис", image: "Real_Betis.png", rating: 84, rarity: "common", probability: 0.09 },
+        { id: 148, name: "Родриго Рикельме", team: "Реал Бетис", image: "Real_Betis.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 149, name: "Пабло Гарсия", team: "Реал Бетис", image: "Real_Betis.png", rating: 67, rarity: "common", probability: 0.09 },
+        { id: 150, name: "Айтор Руибаль", team: "Реал Бетис", image: "Real_Betis.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 151, name: "Кучо Эрнандез", team: "Реал Бетис", image: "Real_Betis.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 152, name: "Чими Авила", team: "Реал Бетис", image: "Real_Betis.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 153, name: "Седрик Бакамбу", team: "Реал Бетис", image: "Real_Betis.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 154, name: "Унай Симон", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 84, rarity: "common", probability: 0.09 },
+        { id: 155, name: "Алекс Падилья", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 156, name: "Дани Вивиан", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 85, rarity: "common", probability: 0.09 },
+        { id: 157, name: "Эмерик Ляпорт", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 82, rarity: "common", probability: 0.09 },
+        { id: 158, name: "Айтор Паредес", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 159, name: "Йерай Альварес", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 160, name: "Адама Бойро", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 161, name: "Юри Берчиче", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 162, name: "Хесус Аресо", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 163, name: "Андони Горосабель", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 164, name: "Иньиго Лекуе", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 165, name: "Микель Весга", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 166, name: "Беньят Прадос", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 167, name: "Алехандро Рего", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 67, rarity: "common", probability: 0.09 },
+        { id: 168, name: "Селтон Санчез", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 169, name: "Ойян Сансет", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 84, rarity: "common", probability: 0.09 },
+        { id: 170, name: "Унай Гомез", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 171, name: "Алекс Беренгер", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 82, rarity: "common", probability: 0.09 },
+        { id: 172, name: "Нико Серрано", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 173, name: "Иньяки Уильямс", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 83, rarity: "common", probability: 0.09 },
+        { id: 174, name: "Роберт Наварро", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 175, name: "Горка Гурусета", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 176, name: "Мароан Саннади", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 177, name: "Урко Изета", team: "Атлетик Бильбао", image: "Athletic_Bilbao.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 178, name: "Йонут Раду", team: "Сельта", image: "Celta.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 179, name: "Иван Виллар", team: "Сельта", image: "Celta.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 180, name: "Хави Родригес", team: "Сельта", image: "Celta.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 181, name: "Карл Старфельт", team: "Сельта", image: "Celta.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 182, name: "Йоэл Лаго", team: "Сельта", image: "Celta.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 183, name: "Карлос Домингес", team: "Сельта", image: "Celta.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 184, name: "Ману Фернандес", team: "Сельта", image: "Celta.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 185, name: "Маркос Алонсо", team: "Сельта", image: "Celta.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 186, name: "Джосеф Айду", team: "Сельта", image: "Celta.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 187, name: "Михайло Ристич", team: "Сельта", image: "Celta.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 188, name: "Серхио Каррейра", team: "Сельта", image: "Celta.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 189, name: "Хави Руеда", team: "Сельта", image: "Celta.png", rating: 67, rarity: "common", probability: 0.09 },
+        { id: 190, name: "Альваро Нуньес", team: "Сельта", image: "Celta.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 191, name: "Илаиш Морриба", team: "Сельта", image: "Celta.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 192, name: "Мигель Роман", team: "Сельта", image: "Celta.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 193, name: "Юго Сотело", team: "Сельта", image: "Celta.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 194, name: "Матиас Весино", team: "Сельта", image: "Celta.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 195, name: "Фер Лопес", team: "Сельта", image: "Celta.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 196, name: "Виллиот Сведберг", team: "Сельта", image: "Celta.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 197, name: "Юго Альварес", team: "Сельта", image: "Celta.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 198, name: "Франко Черви", team: "Сельта", image: "Celta.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 199, name: "Ферран Жутгла", team: "Сельта", image: "Celta.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 200, name: "Пабло Дюран", team: "Сельта", image: "Celta.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 201, name: "Борха Иглесиас", team: "Сельта", image: "Celta.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 202, name: "Йаго Аспас", team: "Сельта", image: "Celta.png", rating: 82, rarity: "common", probability: 0.09 },
+        { id: 203, name: "Йонес Эль-Абделауи", team: "Сельта", image: "Celta.png", rating: 65, rarity: "common", probability: 0.09 },
+        { id: 204, name: "Одисеяс Влаходимос", team: "Севилья", image: "sevilla.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 205, name: "Оръян Нюланд", team: "Севилья", image: "sevilla.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 206, name: "Кике Салас", team: "Севилья", image: "sevilla.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 207, name: "Андрес Кастрин", team: "Севилья", image: "sevilla.png", rating: 60, rarity: "common", probability: 0.09 },
+        { id: 208, name: "Маркао", team: "Севилья", image: "sevilla.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 209, name: "Фабио Кардосо", team: "Севилья", image: "sevilla.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 210, name: "Тангай Нианзу", team: "Севилья", image: "sevilla.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 211, name: "Федерико Гаттони", team: "Севилья", image: "sevilla.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 212, name: "Осо", team: "Севилья", image: "sevilla.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 213, name: "Габриель Суазо", team: "Севилья", image: "sevilla.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 214, name: "Хосе Анхель Кармона", team: "Севилья", image: "sevilla.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 215, name: "Хуанлу Санчез", team: "Севилья", image: "sevilla.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 216, name: "Люсьен Агуме", team: "Севилья", image: "sevilla.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 217, name: "Батиста Менди", team: "Севилья", image: "sevilla.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 218, name: "Неманья Гудель", team: "Севилья", image: "sevilla.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 219, name: "Джибриль Соу", team: "Севилья", image: "sevilla.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 220, name: "Ману Буэно", team: "Севилья", image: "sevilla.png", rating: 65, rarity: "common", probability: 0.09 },
+        { id: 221, name: "Жоан Джордан", team: "Севилья", image: "sevilla.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 222, name: "Рубен Варгас", team: "Севилья", image: "sevilla.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 223, name: "Чедира Эджуке", team: "Севилья", image: "sevilla.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 224, name: "Аднан Янузай", team: "Севилья", image: "sevilla.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 225, name: "Пеке Фернандес", team: "Севилья", image: "sevilla.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 226, name: "Алексис Санчез", team: "Севилья", image: "sevilla.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 227, name: "Акор Адамс", team: "Севилья", image: "sevilla.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 228, name: "Исаак Ромеро", team: "Севилья", image: "sevilla.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 229, name: "Нель Маупай", team: "Севилья", image: "sevilla.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 230, name: "Юлен Агиррезабала", team: "Валенсия", image: "valencia.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 231, name: "Столе Дмитриевски", team: "Валенсия", image: "valencia.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 232, name: "Сезар Таррега", team: "Валенсия", image: "valencia.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 233, name: "Хосе Копете", team: "Валенсия", image: "valencia.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 234, name: "Унай Нуньес", team: "Валенсия", image: "valencia.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 235, name: "Ерай Комерт", team: "Валенсия", image: "valencia.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 236, name: "Мухтар Диакаби", team: "Валенсия", image: "valencia.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 237, name: "Хосе Гайа", team: "Валенсия", image: "valencia.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 238, name: "Хесус Васкес", team: "Валенсия", image: "valencia.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 239, name: "Тьери Коррейа", team: "Валенсия", image: "valencia.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 240, name: "Ренцо Сарравиа", team: "Валенсия", image: "valencia.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 241, name: "Димитри Фулькье", team: "Валенсия", image: "valencia.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 242, name: "Пепелу", team: "Валенсия", image: "valencia.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 243, name: "Гидо Родригез", team: "Валенсия", image: "valencia.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 244, name: "Баптисте Сантамария", team: "Валенсия", image: "valencia.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 245, name: "Хави Герра", team: "Валенсия", image: "valencia.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 246, name: "Филип Угриник", team: "Валенсия", image: "valencia.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 247, name: "Андре Альмейда", team: "Валенсия", image: "valencia.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 248, name: "Рамазани", team: "Валенсия", image: "valencia.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 249, name: "Арнау Данджума", team: "Валенсия", image: "valencia.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 250, name: "Диего Лопес", team: "Валенсия", image: "valencia.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 251, name: "Луис Риоха", team: "Валенсия", image: "valencia.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 252, name: "Дани Раба", team: "Валенсия", image: "valencia.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 253, name: "Уго Дуро", team: "Валенсия", image: "valencia.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 254, name: "Лукас Бельтран", team: "Валенсия", image: "valencia.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 255, name: "Умар Садик", team: "Валенсия", image: "valencia.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 256, name: "Марко Дмитрович", team: "Эспаньол", image: "Espanyol.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 257, name: "Анхель Фортуньо", team: "Эспаньол", image: "Espanyol.png", rating: 66, rarity: "common", probability: 0.09 },
+        { id: 258, name: "Клеменс Рьедель", team: "Эспаньол", image: "Espanyol.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 259, name: "Фернандо Калеро", team: "Эспаньол", image: "Espanyol.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 260, name: "Мигель Рубио", team: "Эспаньол", image: "Espanyol.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 261, name: "Леандро Кабрера", team: "Эспаньол", image: "Espanyol.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 262, name: "Карлос Ромеро", team: "Эспаньол", image: "Espanyol.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 263, name: "Хосе Салиньяс", team: "Эспаньол", image: "Espanyol.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 264, name: "Омар Эль Хиляли", team: "Эспаньол", image: "Espanyol.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 265, name: "Рубен Санчез", team: "Эспаньол", image: "Espanyol.png", rating: 68, rarity: "common", probability: 0.09 },
+        { id: 266, name: "Урко Гонсалез де Зарате", team: "Эспаньол", image: "Espanyol.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 267, name: "Чарлес Пикель", team: "Эспаньол", image: "Espanyol.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 268, name: "Пол Лозано", team: "Эспаньол", image: "Espanyol.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 269, name: "Эду Экспозито", team: "Эспаньол", image: "Espanyol.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 270, name: "Рамон Терратс", team: "Эспаньол", image: "Espanyol.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 271, name: "Хави Пуадо", team: "Эспаньол", image: "Espanyol.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 272, name: "Пере Милья", team: "Эспаньол", image: "Espanyol.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 273, name: "Долан", team: "Эспаньол", image: "Espanyol.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 274, name: "Нгонж", team: "Эспаньол", image: "Espanyol.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 275, name: "Жофре Каррерас", team: "Эспаньол", image: "Espanyol.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 276, name: "Антониу Рока", team: "Эспаньол", image: "Espanyol.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 277, name: "Роберто Фернандез", team: "Эспаньол", image: "Espanyol.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 278, name: "Кике Гарсия", team: "Эспаньол", image: "Espanyol.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 279, name: "Райан", team: "Леванте", image: "Levante.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 280, name: "Пабло Кампос", team: "Леванте", image: "Levante.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 281, name: "Матиас Морено", team: "Леванте", image: "Levante.png", rating: 65, rarity: "common", probability: 0.09 },
+        { id: 282, name: "Алан Маттуро", team: "Леванте", image: "Levante.png", rating: 66, rarity: "common", probability: 0.09 },
+        { id: 283, name: "Адриан Де ла Фуенте", team: "Леванте", image: "Levante.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 284, name: "Унай Эльгезабаль", team: "Леванте", image: "Levante.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 285, name: "Ману Санчез", team: "Леванте", image: "Levante.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 286, name: "Диего Пампин", team: "Леванте", image: "Levante.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 287, name: "Джереми Толян", team: "Леванте", image: "Levante.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 288, name: "Виктор Гарсия", team: "Леванте", image: "Levante.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 289, name: "Уго Рахубер", team: "Леванте", image: "Levante.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 290, name: "Кервин Арриага", team: "Леванте", image: "Levante.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 291, name: "Ориоль Рей", team: "Леванте", image: "Levante.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 292, name: "Пабло Мартинез", team: "Леванте", image: "Levante.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 293, name: "Хон Андер Оласагасти", team: "Леванте", image: "Levante.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 294, name: "Унай Венцедор", team: "Леванте", image: "Levante.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 295, name: "Карлос Альварез", team: "Леванте", image: "Levante.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 296, name: "Роджер Бругуэ", team: "Леванте", image: "Levante.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 297, name: "Пако Кортес", team: "Леванте", image: "Levante.png", rating: 68, rarity: "common", probability: 0.09 },
+        { id: 298, name: "Карим Тунде", team: "Леванте", image: "Levante.png", rating: 58, rarity: "common", probability: 0.09 },
+        { id: 299, name: "Тай Абед", team: "Леванте", image: "Levante.png", rating: 62, rarity: "common", probability: 0.09 },
+        { id: 300, name: "Икер Лосада", team: "Леванте", image: "Levante.png", rating: 66, rarity: "common", probability: 0.09 },
+        { id: 301, name: "Карлос Эспи", team: "Леванте", image: "Levante.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 302, name: "Карл Эта Эйонг", team: "Леванте", image: "Levante.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 303, name: "Иван Ромеро", team: "Леванте", image: "Levante.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 304, name: "Хосе Луис Моралес", team: "Леванте", image: "Levante.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 305, name: "Аугусто Баталья", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 306, name: "Дани Карденас", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 307, name: "Нобель Менди", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 67, rarity: "common", probability: 0.09 },
+        { id: 308, name: "Абдул Мумин", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 309, name: "Луиз Фелипе", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 310, name: "Флориан Лежён", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 311, name: "Пеп Чевария", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 312, name: "Альфонсо Эспино", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 313, name: "Андрей Ратиу", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 314, name: "Жерар Гумбау", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 315, name: "Иван Балиу", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 316, name: "Педро Диас", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 317, name: "Унай Лопес", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 318, name: "Оскар Валентин", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 319, name: "Пате Сис", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 320, name: "Ранди Нтека", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 321, name: "Оскар Трехо", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 322, name: "Карлос Мартин", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 323, name: "Альваро Гарсия", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 324, name: "Ильяс Ахомаш", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 325, name: "Хорхе де Фрутос", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 326, name: "Фран Перез", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 327, name: "Иси Палазон", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 82, rarity: "common", probability: 0.09 },
+        { id: 328, name: "Алемао", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 329, name: "Серхио Камелльо", team: "Райо Вальекано", image: "Rayo_Vallecano", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 330, name: "Серхио Эррера", team: "Осасуна", image: "osasuna.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 331, name: "Энцо Бойомо", team: "Осасуна", image: "osasuna.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 332, name: "Хорхе Эрнандо", team: "Осасуна", image: "osasuna.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 333, name: "Алехандро Катена", team: "Осасуна", image: "osasuna.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 334, name: "Абель Бретонес", team: "Осасуна", image: "osasuna.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 335, name: "Хави Галан", team: "Осасуна", image: "osasuna.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 336, name: "Хуан Круз", team: "Осасуна", image: "osasuna.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 337, name: "Валентин Росье", team: "Осасуна", image: "osasuna.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 338, name: "Лукас Торро", team: "Осасуна", image: "osasuna.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 339, name: "Икер Муньос", team: "Осасуна", image: "osasuna.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 340, name: "Хон Монкайола", team: "Осасуна", image: "osasuna.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 341, name: "Аймар Ороз", team: "Осасуна", image: "osasuna.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 342, name: "Мой Гомез", team: "Осасуна", image: "osasuna.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 343, name: "Виктор Муньос", team: "Осасуна", image: "osasuna.png", rating: 82, rarity: "common", probability: 0.09 },
+        { id: 344, name: "Рауль Моро", team: "Осасуна", image: "osasuna.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 345, name: "Рубен Гарсия", team: "Осасуна", image: "osasuna.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 346, name: "Кике Барха", team: "Осасуна", image: "osasuna.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 347, name: "Икер Бенито", team: "Осасуна", image: "osasuna.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 348, name: "Рауль Гарсия", team: "Осасуна", image: "osasuna.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 349, name: "Анте Будимир", team: "Осасуна", image: "osasuna.png", rating: 82, rarity: "common", probability: 0.09 },
+        { id: 350, name: "Иньяки Пенья", team: "Эльче", image: "Elche.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 351, name: "Алехандро Итурбе", team: "Эльче", image: "Elche.png", rating: 66, rarity: "common", probability: 0.09 },
+        { id: 352, name: "Давид Аффенгрубер", team: "Эльче", image: "Elche.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 353, name: "Виктор Чуст", team: "Эльче", image: "Elche.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 354, name: "Джон Дональд", team: "Эльче", image: "Elche.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 355, name: "Педро Бигас", team: "Эльче", image: "Elche.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 356, name: "Адриа Педроса", team: "Эльче", image: "Elche.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 357, name: "Лео Петру", team: "Эльче", image: "Elche.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 358, name: "Эктор Форт", team: "Эльче", image: "Elche.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 359, name: "Буба Сангаре", team: "Эльче", image: "Elche.png", rating: 64, rarity: "common", probability: 0.09 },
+        { id: 360, name: "Марк Агуадо", team: "Эльче", image: "Elche.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 361, name: "Федерико Редондо", team: "Эльче", image: "Elche.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 362, name: "Алейкс Фебас", team: "Эльче", image: "Elche.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 363, name: "Мартим Нето", team: "Эльче", image: "Elche.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 364, name: "Гонсало Виллар", team: "Эльче", image: "Elche.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 365, name: "Герман Валера", team: "Эльче", image: "Elche.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 366, name: "Лукас Кепеда", team: "Эльче", image: "Elche.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 367, name: "Тете Моренте", team: "Эльче", image: "Elche.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 368, name: "Яго Сантияго", team: "Эльче", image: "Elche.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 369, name: "Гради Диангана", team: "Эльче", image: "Elche.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 370, name: "Альваро Родригез", team: "Эльче", image: "Elche.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 371, name: "Рафа Мир", team: "Эльче", image: "Elche.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 372, name: "Андре Силва", team: "Эльче", image: "Elche.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 373, name: "Давид Сория", team: "Хетафе", image: "getafe.png", rating: 81, rarity: "common", probability: 0.09 },
+        { id: 374, name: "Абдель Абкар", team: "Хетафе", image: "getafe.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 375, name: "Джири Летачек", team: "Хетафе", image: "getafe.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 376, name: "Заид Ромеро", team: "Хетафе", image: "getafe.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 377, name: "Себастиан Боссели", team: "Хетафе", image: "getafe.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 378, name: "Даконам Джене", team: "Хетафе", image: "getafe.png", rating: 78, rarity: "common", probability: 0.09 },
+        { id: 379, name: "Домингес Дуарте", team: "Хетафе", image: "getafe.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 380, name: "Диего Рико", team: "Хетафе", image: "getafe.png", rating: 77, rarity: "common", probability: 0.09 },
+        { id: 381, name: "Хуан Иглесиас", team: "Хетафе", image: "getafe.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 382, name: "Кико Фемения", team: "Хетафе", image: "getafe.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 383, name: "Марио Мартин", team: "Хетафе", image: "getafe.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 384, name: "Мауро Аррамбари", team: "Хетафе", image: "getafe.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 385, name: "Луис Милья", team: "Хетафе", image: "getafe.png", rating: 80, rarity: "common", probability: 0.09 },
+        { id: 386, name: "Хави Муньос", team: "Хетафе", image: "getafe.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 387, name: "Велько Бирманчевич", team: "Хетафе", image: "getafe.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 388, name: "Адриан Лисо", team: "Хетафе", image: "getafe.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 389, name: "Хуанми", team: "Хетафе", image: "getafe.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 390, name: "Абу Камара", team: "Хетафе", image: "getafe.png", rating: 68, rarity: "common", probability: 0.09 },
+        { id: 391, name: "Мартин Сатриано", team: "Хетафе", image: "getafe.png", rating: 75, rarity: "common", probability: 0.09 },
+        { id: 392, name: "Алекс Санкрис", team: "Хетафе", image: "getafe.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 393, name: "Борха Майораль", team: "Хетафе", image: "getafe.png", rating: 79, rarity: "common", probability: 0.09 },
+        { id: 394, name: "Луис Васкез", team: "Хетафе", image: "getafe.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 395, name: "Антонио Сивера", team: "Алавес", image: "Alaves.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 396, name: "Хон Пачеко", team: "Алавес", image: "Alaves.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 397, name: "Вилле Коски", team: "Алавес", image: "Alaves.png", rating: 66, rarity: "common", probability: 0.09 },
+        { id: 398, name: "Факундо Гарсес", team: "Алавес", image: "Alaves.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 399, name: "Йозеф Энрикез", team: "Алавес", image: "Alaves.png", rating: 63, rarity: "common", probability: 0.09 },
+        { id: 400, name: "Виктор Парада", team: "Алавес", image: "Alaves.png", rating: 67, rarity: "common", probability: 0.09 },
+        { id: 401, name: "Нахуель Тtналья", team: "Алавес", image: "Alaves.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 402, name: "Джонни Отто", team: "Алавес", image: "Alaves.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 403, name: "Антонио Бланко", team: "Алавес", image: "Alaves.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 404, name: "Карлос Протесони", team: "Алавес", image: "Alaves.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 405, name: "Пабло Ибаньес", team: "Алавес", image: "Alaves.png", rating: 72, rarity: "common", probability: 0.09 },
+        { id: 406, name: "Карлес Аленья", team: "Алавес", image: "Alaves.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 407, name: "Андер Гевара", team: "Алавес", image: "Alaves.png", rating: 76, rarity: "common", probability: 0.09 },
+        { id: 408, name: "Хон Гуриди", team: "Алавес", image: "Alaves.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 409, name: "Калебе", team: "Алавес", image: "Alaves.png", rating: 69, rarity: "common", probability: 0.09 },
+        { id: 410, name: "Денис Суарес", team: "Алавес", image: "Alaves.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 411, name: "Абде Ребах", team: "Алавес", image: "Alaves.png", rating: 71, rarity: "common", probability: 0.09 },
+        { id: 412, name: "Анхель Перез", team: "Алавес", image: "Alaves.png", rating: 70, rarity: "common", probability: 0.09 },
+        { id: 413, name: "Тони Мартинез", team: "Алавес", image: "Alaves.png", rating: 74, rarity: "common", probability: 0.09 },
+        { id: 414, name: "Лукас Бойе", team: "Алавес", image: "Alaves.png", rating: 73, rarity: "common", probability: 0.09 },
+        { id: 415, name: "Ибраим Диабате", team: "Алавес", image: "Alaves.png", rating: 67, rarity: "common", probability: 0.09 },
+        { id: 416, name: "Мариано Диас", team: "Алавес", image: "Alaves.png", rating: 70, rarity: "common", probability: 0.09 },
+   	{ id: 417, name: "Джони Кардосо", team: "Атлетико Мадрид", image: "atletico_madrid.png", rating: 80, rarity: "common", probability: 0.09 }
+    ];
+
+    // Ключи для localStorage
+    const STORAGE_KEYS = {
+        OWNED: "laliga_collection_owned",
+        DUPLICATES: "laliga_collection_duplicates",
+        LAST_OPEN: "laliga_pack_last_open",
+        PACKS: "laliga_packs_available"
+    };
+
+    let packsAvailable = 1;
+    let lastOpenDate = null;
+    let ownedCards = {};
+    let duplicates = {};
+
+    // DOM элементы
+    const pack = document.getElementById('pack');
+    const packContainer = document.getElementById('packContainer');
+    const openBtn = document.getElementById('openBtn');
+    const resultArea = document.getElementById('resultArea');
+    const cardReveal = document.getElementById('cardReveal');
+    const packsAvailableSpan = document.getElementById('packsAvailable');
+    const nextPackTimeSpan = document.getElementById('nextPackTime');
+
+    // Загрузка данных
+    function loadData() {
+        const savedOwned = localStorage.getItem(STORAGE_KEYS.OWNED);
+        if (savedOwned) ownedCards = JSON.parse(savedOwned);
+        
+        const savedDuplicates = localStorage.getItem(STORAGE_KEYS.DUPLICATES);
+        if (savedDuplicates) duplicates = JSON.parse(savedDuplicates);
+        
+        const savedLastOpen = localStorage.getItem(STORAGE_KEYS.LAST_OPEN);
+        if (savedLastOpen) lastOpenDate = savedLastOpen;
+        
+        const savedPacks = localStorage.getItem(STORAGE_KEYS.PACKS);
+        if (savedPacks && !isNaN(parseInt(savedPacks))) {
+            packsAvailable = parseInt(savedPacks);
+        } else {
+            checkAndUpdateDailyPack();
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEYS.OWNED, JSON.stringify(ownedCards));
+        localStorage.setItem(STORAGE_KEYS.DUPLICATES, JSON.stringify(duplicates));
+        localStorage.setItem(STORAGE_KEYS.LAST_OPEN, lastOpenDate);
+        localStorage.setItem(STORAGE_KEYS.PACKS, packsAvailable.toString());
+    }
+
+    function checkAndUpdateDailyPack() {
+        const now = new Date();
+        if (!lastOpenDate) {
+            packsAvailable = 1;
+            saveData();
+            return;
+        }
+        
+        const last = new Date(lastOpenDate);
+        if (last.getDate() !== now.getDate() || 
+            last.getMonth() !== now.getMonth() || 
+            last.getFullYear() !== now.getFullYear()) {
+            packsAvailable = Math.min(packsAvailable + 1, 3);
+            saveData();
+        }
+    }
+
+    function updateStats() {
+        packsAvailableSpan.textContent = packsAvailable;
+        
+        if (lastOpenDate) {
+            const last = new Date(lastOpenDate);
+            const next = new Date(last);
+            next.setDate(last.getDate() + 1);
+            next.setHours(0, 0, 0, 0);
+            
+            const now = new Date();
+            const diff = next - now;
+            
+            if (diff > 0) {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (3600000)) / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                nextPackTimeSpan.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                nextPackTimeSpan.textContent = "Доступно!";
+            }
+        } else {
+            nextPackTimeSpan.textContent = "Доступно!";
+        }
+    }
+
+    function getRandomPlayer() {
+        const totalProbability = PLAYERS.reduce((sum, p) => sum + p.probability, 0);
+        let random = Math.random() * totalProbability;
+        
+        for (const player of PLAYERS) {
+            if (random < player.probability) {
+                return player;
+            }
+            random -= player.probability;
+        }
+        return PLAYERS[0];
+    }
+
+    function getRarityText(rarity) {
+        switch(rarity) {
+            case 'legendary': return '🌟 Легендарная';
+            case 'epic': return '💎 Эпическая';
+            default: return '📘 Обычная';
+        }
+    }
+
+    function getBadgeClass(rarity) {
+        switch(rarity) {
+            case 'legendary': return 'badge-legendary';
+            case 'epic': return 'badge-epic';
+            default: return 'badge-rare';
+        }
+    }
+
+    function openPackAnimation() {
+        if (packsAvailable <= 0) {
+            alert('⏰ У тебя нет доступных паков! Возвращайся завтра!');
+            return;
+        }
+        
+        packsAvailable--;
+        saveData();
+        
+        pack.classList.add('shake');
+        setTimeout(() => {
+            pack.classList.remove('shake');
+        }, 300);
+        
+        setTimeout(() => {
+            pack.classList.add('open');
+        }, 300);
+        
+        setTimeout(() => {
+            const player = getRandomPlayer();
+            const isDuplicate = ownedCards[player.id];
+            
+            if (isDuplicate) {
+                duplicates[player.id] = (duplicates[player.id] || 0) + 1;
+            } else {
+                ownedCards[player.id] = true;
+            }
+            
+            saveData();
+            showResult(player, isDuplicate);
+            updateStats();
+        }, 800);
+    }
+
+    function showResult(player, isDuplicate) {
+        pack.style.display = 'none';
+        openBtn.style.display = 'none';
+        
+        const duplicateCount = duplicates[player.id] || 0;
+        const badgeClass = getBadgeClass(player.rarity);
+        const rarityText = getRarityText(player.rarity);
+        
+        cardReveal.innerHTML = `
+            <div class="card-display">
+                <div class="card-emoji">${player.emoji}</div>
+                <div class="card-info">
+                    <div class="card-name">${player.name}</div>
+                    <div class="card-team">⚽ ${player.team}</div>
+                    <div class="card-rating">⭐ Рейтинг: ${player.rating}</div>
+                    <div class="badge ${badgeClass}">${rarityText}</div>
+                    ${isDuplicate ? 
+                        `<div class="duplicate-info">📦 ДУБЛИКАТ! +1 дубликат (всего: ${duplicateCount})</div>` : 
+                        `<div class="new-info">🎉 НОВАЯ КАРТОЧКА! Добавлена в коллекцию 🎉</div>`
+                    }
+                </div>
+            </div>
+        `;
+        
+        resultArea.style.display = 'block';
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetAndClose() {
+        pack.style.display = 'flex';
+        openBtn.style.display = 'block';
+        pack.classList.remove('open');
+        resultArea.style.display = 'none';
+        updateStats();
+        
+        if (packsAvailable === 0 && !canGetDailyPack()) {
+            openBtn.disabled = true;
+            openBtn.style.opacity = '0.5';
+        }
+    }
+
+    function canGetDailyPack() {
+        if (!lastOpenDate) return true;
+        const last = new Date(lastOpenDate);
+        const now = new Date();
+        return last.getDate() !== now.getDate() || 
+               last.getMonth() !== now.getMonth() || 
+               last.getFullYear() !== now.getFullYear();
+    }
+
+    openBtn.addEventListener('click', openPackAnimation);
+    document.getElementById('nextBtn').addEventListener('click', resetAndClose);
+    
+    setInterval(updateStats, 1000);
+    
+    loadData();
+    updateStats();
+    
+    if (packsAvailable === 0 && !canGetDailyPack()) {
+        openBtn.disabled = true;
+        openBtn.style.opacity = '0.5';
+    }
+</script>
+</body>
+</html>
