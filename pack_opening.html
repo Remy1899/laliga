@@ -868,10 +868,14 @@
         }
         
         const last = new Date(lastOpenDate);
-        // Сравниваем даты (день, месяц, год)
-        if (last.getDate() !== now.getDate() || 
-            last.getMonth() !== now.getMonth() || 
-            last.getFullYear() !== now.getFullYear()) {
+        
+        // Сравниваем даты
+        const isNewDay = last.getDate() !== now.getDate() || 
+                         last.getMonth() !== now.getMonth() || 
+                         last.getFullYear() !== now.getFullYear();
+        
+        if (isNewDay) {
+            // Максимум 3 пака может накопиться
             packsAvailable = Math.min(packsAvailable + 1, 3);
             saveData();
         }
@@ -958,6 +962,12 @@
         }
         
         packsAvailable--;
+        
+        // Устанавливаем дату последнего открытия ТОЛЬКО если это был последний пак
+        if (packsAvailable === 0) {
+            lastOpenDate = new Date().toISOString();
+        }
+        
         saveData();
         
         pack.classList.add('shake');
