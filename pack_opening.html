@@ -868,6 +868,7 @@
         }
         
         const last = new Date(lastOpenDate);
+        // Сравниваем даты (день, месяц, год)
         if (last.getDate() !== now.getDate() || 
             last.getMonth() !== now.getMonth() || 
             last.getFullYear() !== now.getFullYear()) {
@@ -879,13 +880,17 @@
     function updateStats() {
         packsAvailableSpan.textContent = packsAvailable;
         
-        if (lastOpenDate) {
+        const now = new Date();
+        
+        // Проверяем, можно ли открыть пак прямо сейчас
+        let canOpenNow = packsAvailable > 0;
+        
+        if (!canOpenNow && lastOpenDate) {
             const last = new Date(lastOpenDate);
             const next = new Date(last);
             next.setDate(last.getDate() + 1);
             next.setHours(0, 0, 0, 0);
             
-            const now = new Date();
             const diff = next - now;
             
             if (diff > 0) {
@@ -894,10 +899,26 @@
                 const seconds = Math.floor((diff % 60000) / 1000);
                 nextPackTimeSpan.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             } else {
-                nextPackTimeSpan.textContent = "Доступно!";
+                // Если время вышло, но паков нет - проверяем daily обновление
+                checkAndUpdateDailyPack();
+                updateStats();
+                return;
             }
+        } else if (canOpenNow) {
+            nextPackTimeSpan.textContent = "Доступно!";
+        } else if (!lastOpenDate) {
+            nextPackTimeSpan.textContent = "Доступно!";
         } else {
             nextPackTimeSpan.textContent = "Доступно!";
+        }
+        
+        // Обновляем состояние кнопки
+        if (packsAvailable === 0 && !canOpenNow) {
+            openBtn.disabled = true;
+            openBtn.style.opacity = '0.5';
+        } else {
+            openBtn.disabled = false;
+            openBtn.style.opacity = '1';
         }
     }
 
