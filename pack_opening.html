@@ -870,52 +870,40 @@
     function checkAndUpdateDailyPack() {
         const now = new Date();
         if (!lastOpenDate) {
-            // Первый запуск - даём 1 пак и запускаем таймер на следующий
             packsAvailable = 1;
             lastOpenDate = now.toISOString();
-            // Следующий пак через 8 часов
             nextPackTime = new Date(now.getTime() + 8 * 60 * 60 * 1000).toISOString();
             saveData();
             return;
         }
         
-        // Если паков уже 3 - таймер не идёт
         if (packsAvailable >= 3) {
             nextPackTime = null;
             saveData();
             return;
         }
         
-        // Проверяем, не пора ли добавить пак
-        const last = new Date(lastOpenDate);
         const nowTime = now.getTime();
         
-        // Если есть nextPackTime и он уже прошёл
         if (nextPackTime) {
             const next = new Date(nextPackTime);
             if (nowTime >= next.getTime()) {
-                // Добавляем пак
                 packsAvailable = Math.min(packsAvailable + 1, 3);
                 lastOpenDate = now.toISOString();
                 
-                // Если паков стало меньше 3 - планируем следующий
                 if (packsAvailable < 3) {
                     nextPackTime = new Date(nowTime + 8 * 60 * 60 * 1000).toISOString();
                 } else {
                     nextPackTime = null;
                 }
                 saveData();
-                // Рекурсивно проверяем, не нужно ли добавить ещё один пак
                 checkAndUpdateDailyPack();
                 return;
             }
-        } else {
-            // nextPackTime = null, значит паков 3 или таймер не запущен
-            if (packsAvailable < 3) {
-                // Запускаем таймер
-                nextPackTime = new Date(nowTime + 8 * 60 * 60 * 1000).toISOString();
-                saveData();
-            }
+        } else if (packsAvailable < 3) {
+            // Если nextPackTime = null, а паков меньше 3 — запускаем таймер
+            nextPackTime = new Date(nowTime + 8 * 60 * 60 * 1000).toISOString();
+            saveData();
         }
     }
 
@@ -1005,10 +993,13 @@
         // Сохраняем дату последнего открытия
         lastOpenDate = new Date().toISOString();
         
-        // Если паков стало меньше 3 и нет таймера - запускаем
-        if (packsAvailable < 3 && !nextPackTime) {
+        // Всегда запускаем таймер, если паков меньше 3
+        if (packsAvailable < 3) {
             const now = new Date();
             nextPackTime = new Date(now.getTime() + 8 * 60 * 60 * 1000).toISOString();
+        } else {
+            // Если паков 3 - таймер останавливается
+            nextPackTime = null;
         }
         
         saveData();
