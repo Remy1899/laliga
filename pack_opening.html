@@ -869,6 +869,8 @@
 
     function checkAndUpdateDailyPack() {
         const now = new Date();
+        
+        // Если это первый запуск
         if (!lastOpenDate) {
             packsAvailable = 1;
             lastOpenDate = now.toISOString();
@@ -877,6 +879,7 @@
             return;
         }
         
+        // Если паков уже 3 — таймер не нужен
         if (packsAvailable >= 3) {
             nextPackTime = null;
             saveData();
@@ -885,23 +888,36 @@
         
         const nowTime = now.getTime();
         
+        // Если есть запланированное время
         if (nextPackTime) {
             const next = new Date(nextPackTime);
+            
+            // Если время пришло
             if (nowTime >= next.getTime()) {
-                packsAvailable = Math.min(packsAvailable + 1, 3);
+                // Добавляем пак
+                packsAvailable = packsAvailable + 1;
+                
+                // Обновляем дату последнего изменения
                 lastOpenDate = now.toISOString();
                 
+                // Если паков всё ещё меньше 3 — планируем следующий
                 if (packsAvailable < 3) {
                     nextPackTime = new Date(nowTime + 8 * 60 * 60 * 1000).toISOString();
                 } else {
+                    // Если паков стало 3 — таймер останавливаем
                     nextPackTime = null;
                 }
+                
                 saveData();
+                
+                // Рекурсивно проверяем, не пора ли добавить ещё один пак
+                // (на случай, если накопилось несколько паков за время простоя)
                 checkAndUpdateDailyPack();
                 return;
             }
+            // Если время ещё не пришло — ничего не делаем
         } else if (packsAvailable < 3) {
-            // Если nextPackTime = null, а паков меньше 3 — запускаем таймер
+            // Если nextPackTime === null, а паков меньше 3 — запускаем таймер
             nextPackTime = new Date(nowTime + 8 * 60 * 60 * 1000).toISOString();
             saveData();
         }
